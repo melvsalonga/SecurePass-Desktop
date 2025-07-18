@@ -132,17 +132,56 @@ class SecurePassRenderer {
    */
   async getStarted() {
     try {
-      this.showResult('🚀 Getting started... (Feature coming soon)', 'info');
+      this.showResult('🚀 Getting started...', 'info');
       
-      // Future implementation:
-      // - Check if master password is set
-      // - Show setup wizard if first time
-      // - Navigate to main dashboard
+      // Check if master password is already set
+      const hasMasterPassword = await window.electronAPI.hasMasterPassword();
       
-      console.log('Get started clicked - feature coming soon');
+      if (hasMasterPassword) {
+        // Navigate to authentication page
+        this.navigateToPage('authenticate');
+      } else {
+        // Navigate to master password setup
+        this.navigateToPage('master-password-setup');
+      }
+      
+      console.log('Get started clicked - navigating to', hasMasterPassword ? 'authentication' : 'setup');
     } catch (error) {
       console.error('Get started failed:', error);
       this.showError('Failed to get started: ' + error.message);
+    }
+  }
+
+  /**
+   * Navigate to a specific page
+   */
+  navigateToPage(page) {
+    try {
+      let pagePath;
+      
+      switch (page) {
+        case 'master-password-setup':
+          pagePath = '../pages/master-password-setup.html';
+          break;
+        case 'authenticate':
+          pagePath = '../pages/authenticate.html';
+          break;
+        case 'master-password-change':
+          pagePath = '../pages/master-password-change.html';
+          break;
+        case 'dashboard':
+          pagePath = '../pages/dashboard.html';
+          break;
+        default:
+          throw new Error('Unknown page: ' + page);
+      }
+      
+      // Navigate to the page
+      window.location.href = pagePath;
+      
+    } catch (error) {
+      console.error('Navigation failed:', error);
+      this.showError('Navigation failed: ' + error.message);
     }
   }
 

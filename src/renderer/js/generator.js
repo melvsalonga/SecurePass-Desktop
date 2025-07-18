@@ -10,6 +10,7 @@ class PasswordGeneratorUI {
     this.passwordHistory = [];
     this.maxHistorySize = 50;
     this.initializeEventListeners();
+    this.initializeNavigation();
   }
 
   /**
@@ -165,6 +166,9 @@ class PasswordGeneratorUI {
   displayBatchResults(passwords) {
     const container = document.getElementById('batch-results');
     container.innerHTML = '';
+    
+    // Add batch controls first
+    this.addBatchControls();
     
     passwords.forEach((passwordData, index) => {
       const item = document.createElement('div');
@@ -452,207 +456,61 @@ class PasswordGeneratorUI {
       notification.classList.remove('show');
     }, 3000);
   }
-}
-
-// Initialize the password generator UI when the page loads
-let passwordGeneratorUI;
-
-document.addEventListener('DOMContentLoaded', () => {
-  passwordGeneratorUI = new PasswordGeneratorUI();
-  
-  // Generate an initial password
-  passwordGeneratorUI.generatePassword();
-  
-  console.log('Password Generator UI initialized');
-});
-
-// Export for testing
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = PasswordGeneratorUI;
-}
 
   /**
-   * Setup default values
+   * Export batch passwords to file
    */
-  setupDefaults() {
-    document.getElementById('length').value = 16;
-    document.getElementById('lengthValue').textContent = '16';
-    document.getElementById('passphraseWords').value = 4;
-    document.getElementById('passphraseWordsValue').textContent = '4';
-    document.getElementById('batchCount').value = 10;
+  async exportBatchPasswords(format = 'txt') {
+    const passwords = Array.from(document.querySelectorAll('.batch-item'))
+      .map(item => {
+        const password = item.querySelector('.batch-password input').value;
+        const strength = item.querySelector('.strength-indicator').textContent;
+        const score = item.querySelector('.strength-score').textContent;
+        return { password, strength, score };
+      });
     
-    // Set default options
-    document.getElementById('uppercase').checked = true;
-    document.getElementById('lowercase').checked = true;
-    document.getElementById('numbers').checked = true;
-    document.getElementById('symbols').checked = true;
-    document.getElementById('excludeSimilar').checked = true;
-    document.getElementById('excludeAmbiguous').checked = true;
-    
-    this.resetStrengthMeter();
-  }
-
-  /**
-   * Setup listeners for option changes
-   */
-  setupOptionChangeListeners() {
-    const options = [
-      'uppercase', 'lowercase', 'numbers', 'symbols',
-      'excludeSimilar', 'excludeAmbiguous', 'length'
-    ];
-
-    options.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.addEventListener('change', () => {
-          this.showRegenerationSuggestion();
-        });
-      }
-    });
-  }
-
-  /**
-   * Generate a new password
-   */
-  async generatePassword() {
-    try {
-      this.setGeneratingState(true);
-      
-      const options = this.getPasswordOptions();
-      const response = await ipcRenderer.invoke('generate-password', options);
-      
-      if (response.success) {
-        this.currentPassword = response.password;
-        document.getElementById('password').value = response.password;
-        this.analyzePasswordStrength(response.password);
-        this.addToHistory(response.password, 'password');
-        this.hideRegenerationSuggestion();
-        this.showNotification('Password generated successfully!', 'success');
-      } else {
-        this.showNotification(response.error || 'Failed to generate password', 'error');
-      }
-    } catch (error) {
-      this.showNotification('Error generating password: ' + error.message, 'error');
-    } finally {
-      this.setGeneratingState(false);
-    }
-  }
-
-  /**
-   * Regenerate the current password with same options
-   */
-  async regeneratePassword() {
-    if (!this.currentPassword) {
-      await this.generatePassword();
+    if (passwords.length === 0) {
+      this.showNotification('No passwords to export', 'info');
       return;
     }
-    await this.generatePassword();
-  }
-
-  /**
-   * Generate a passphrase
-   */
-  async generatePassphrase() {
-    try {
-      this.setGeneratingState(true, 'passphrase');
-      
-      const options = this.getPassphraseOptions();
-      const response = await ipcRenderer.invoke('generate-passphrase', options);
-      
-      if (response.success) {
-        document.getElementById('passphrase').value = response.passphrase;
-        this.addToHistory(response.passphrase, 'passphrase');
-        this.showNotification('Passphrase generated successfully!', 'success');
-      } else {
-        this.showNotification(response.error || 'Failed to generate passphrase', 'error');
-      }
-    } catch (error) {
-      this.showNotification('Error generating passphrase: ' + error.message, 'error');
-    } finally {
-      this.setGeneratingState(false, 'passphrase');
-    }
-  }
-
-  /**
-   * Regenerate passphrase
-   */
-  async regeneratePassphrase() {
-    await this.generatePassphrase();
-  }
-
-  /**
-   * Generate batch passwords
-   */
-  async generateBatchPasswords() {
-    try {
-      this.setGeneratingState(true, 'batch');
-      
-      const count = parseInt(document.getElementById('batchCount').value) || 10;
-      const options = this.getPasswordOptions();
-      
-      const response = await ipcRenderer.invoke('generate-batch-passwords', {
-        count: count,
-        options: options
-      });
-      
-      if (response.success) {
-        this.displayBatchResults(response.passwords);
-        this.showNotification(`Generated ${response.passwords.length} passwords!`, 'success');
-      } else {
-        this.showNotification(response.error || 'Failed to generate batch passwords', 'error');
-      }
-    } catch (error) {
-      this.showNotification('Error generating batch passwords: ' + error.message, 'error');
-    } finally {
-      this.setGeneratingState(false, 'batch');
-    }
-  }
-
-  /**
-   * Display batch results
-   */
-  displayBatchResults(passwords) {
-    const container = document.getElementById('batchResults');
-    container.innerHTML = '';
     
-    passwords.forEach((passwordData, index) => {
-      const item = document.createElement('div');
-      item.className = 'batch-item';
-      item.innerHTML = `
-        <div class="password">${passwordData.password}</div>
-        <div class="strength ${passwordData.strength.level.toLowerCase().replace(' ', '-')}">${passwordData.strength.level}</div>
-        <button class="copy-btn" onclick="passwordGeneratorUI.copyBatchPassword('${passwordData.password}', ${index})">
-          Copy
-        </button>
-      `;
-      container.appendChild(item);
-    });
-  }
-
-  /**
-   * Copy a specific batch password
-   */
-  async copyBatchPassword(password, index) {
     try {
-      await navigator.clipboard.writeText(password);
-      this.showNotification('Password copied to clipboard!', 'success');
+      let content = '';
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      let filename = `passwords_${timestamp}`;
       
-      // Visual feedback
-      const buttons = document.querySelectorAll('.batch-item .copy-btn');
-      if (buttons[index]) {
-        const originalText = buttons[index].textContent;
-        buttons[index].textContent = 'Copied!';
-        buttons[index].style.backgroundColor = '#2ecc71';
-        buttons[index].style.color = 'white';
-        
-        setTimeout(() => {
-          buttons[index].textContent = originalText;
-          buttons[index].style.backgroundColor = '';
-          buttons[index].style.color = '';
-        }, 1000);
+      switch (format) {
+        case 'txt':
+          content = passwords.map(p => p.password).join('\n');
+          filename += '.txt';
+          break;
+        case 'csv':
+          content = 'Password,Strength,Score\n' + 
+                   passwords.map(p => `"${p.password}","${p.strength}","${p.score}"`).join('\n');
+          filename += '.csv';
+          break;
+        case 'json':
+          content = JSON.stringify({
+            generated: new Date().toISOString(),
+            count: passwords.length,
+            passwords: passwords
+          }, null, 2);
+          filename += '.json';
+          break;
       }
+      
+      // Create download link
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      this.showNotification(`Exported ${passwords.length} passwords as ${format.toUpperCase()}`, 'success');
     } catch (error) {
-      this.showNotification('Failed to copy password', 'error');
+      this.showNotification('Failed to export passwords', 'error');
     }
   }
 
@@ -660,8 +518,8 @@ if (typeof module !== 'undefined' && module.exports) {
    * Copy all batch passwords
    */
   async copyAllBatchPasswords() {
-    const passwords = Array.from(document.querySelectorAll('.batch-item .password'))
-      .map(el => el.textContent);
+    const passwords = Array.from(document.querySelectorAll('.batch-item .batch-password input'))
+      .map(input => input.value);
     
     if (passwords.length === 0) {
       this.showNotification('No passwords to copy', 'info');
@@ -680,345 +538,97 @@ if (typeof module !== 'undefined' && module.exports) {
    * Clear batch results
    */
   clearBatchResults() {
-    document.getElementById('batchResults').innerHTML = '';
+    document.getElementById('batch-results').innerHTML = '';
     this.showNotification('Batch results cleared', 'info');
   }
 
   /**
-   * Get password generation options
+   * Add batch controls for export and management
    */
-  getPasswordOptions() {
-    return {
-      length: parseInt(document.getElementById('length').value),
-      includeUppercase: document.getElementById('uppercase').checked,
-      includeLowercase: document.getElementById('lowercase').checked,
-      includeNumbers: document.getElementById('numbers').checked,
-      includeSymbols: document.getElementById('symbols').checked,
-      excludeSimilar: document.getElementById('excludeSimilar').checked,
-      excludeAmbiguous: document.getElementById('excludeAmbiguous').checked,
-      customCharacters: document.getElementById('customCharacters').value || ''
-    };
+  addBatchControls() {
+    const container = document.getElementById('batch-results');
+    
+    // Check if controls already exist
+    if (container.querySelector('.batch-controls')) return;
+    
+    const controls = document.createElement('div');
+    controls.className = 'batch-controls';
+    controls.innerHTML = `
+      <div class="batch-actions">
+        <button class="btn btn-secondary" onclick="passwordGeneratorUI.copyAllBatchPasswords()">Copy All</button>
+        <button class="btn btn-secondary" onclick="passwordGeneratorUI.exportBatchPasswords('txt')">Export TXT</button>
+        <button class="btn btn-secondary" onclick="passwordGeneratorUI.exportBatchPasswords('csv')">Export CSV</button>
+        <button class="btn btn-secondary" onclick="passwordGeneratorUI.exportBatchPasswords('json')">Export JSON</button>
+        <button class="btn btn-secondary" onclick="passwordGeneratorUI.clearBatchResults()">Clear</button>
+      </div>
+    `;
+    
+    container.insertBefore(controls, container.firstChild);
   }
 
   /**
-   * Get passphrase generation options
+   * Create generation preset
    */
-  getPassphraseOptions() {
-    return {
-      wordCount: parseInt(document.getElementById('passphraseWords').value),
-      separator: document.getElementById('passphraseSeparator').value,
-      capitalize: document.getElementById('passphraseCapitalize').checked,
-      includeNumbers: document.getElementById('passphraseNumbers').checked
-    };
-  }
-
-  /**
-   * Analyze password strength
-   */
-  async analyzePasswordStrength(password) {
+  createPreset() {
+    const options = this.getPasswordOptions();
+    const presetName = prompt('Enter a name for this preset:');
+    
+    if (!presetName) return;
+    
     try {
-      const response = await ipcRenderer.invoke('analyze-password-strength', password);
+      const presets = JSON.parse(localStorage.getItem('passwordPresets') || '{}');
+      presets[presetName] = {
+        ...options,
+        created: new Date().toISOString()
+      };
+      localStorage.setItem('passwordPresets', JSON.stringify(presets));
       
-      if (response.success) {
-        this.updateStrengthMeter(response.analysis);
-        this.updatePasswordDetails(response.analysis);
-        this.updateSecurityFeedback(response.analysis);
-      }
+      this.showNotification(`Preset "${presetName}" saved successfully`, 'success');
+      this.updatePresetsList();
     } catch (error) {
-      console.error('Error analyzing password strength:', error);
-      this.resetStrengthMeter();
+      this.showNotification('Failed to save preset', 'error');
     }
   }
 
   /**
-   * Update strength meter display
+   * Load generation preset
    */
-  updateStrengthMeter(analysis) {
-    const strengthFill = document.getElementById('strengthFill');
-    const strengthLevel = document.getElementById('strengthLevel');
-    const strengthScore = document.getElementById('strengthScore');
-    
-    const percentage = (analysis.score / 100) * 100;
-    strengthFill.style.width = `${percentage}%`;
-    strengthFill.className = `strength-fill ${analysis.level.toLowerCase().replace(' ', '-')}`;
-    
-    strengthLevel.textContent = analysis.level;
-    strengthScore.textContent = `${analysis.score}/100`;
-  }
-
-  /**
-   * Update password details display
-   */
-  updatePasswordDetails(analysis) {
-    const details = [
-      { label: 'Length', value: analysis.length },
-      { label: 'Entropy', value: `${analysis.entropy.toFixed(1)} bits` },
-      { label: 'Time to Crack', value: analysis.crackTime },
-      { label: 'Character Types', value: analysis.characterTypes },
-      { label: 'Unique Characters', value: analysis.uniqueCharacters },
-      { label: 'Patterns Found', value: analysis.patterns || 0 }
-    ];
-    
-    const container = document.getElementById('passwordDetails');
-    container.innerHTML = '';
-    
-    details.forEach(detail => {
-      const item = document.createElement('div');
-      item.className = 'detail-item';
-      item.innerHTML = `
-        <span class="detail-label">${detail.label}:</span>
-        <span>${detail.value}</span>
-      `;
-      container.appendChild(item);
-    });
-  }
-
-  /**
-   * Update security feedback
-   */
-  updateSecurityFeedback(analysis) {
-    const container = document.getElementById('securityFeedback');
-    container.innerHTML = '';
-    
-    if (analysis.feedback && analysis.feedback.length > 0) {
-      const feedbackList = document.createElement('ul');
-      
-      analysis.feedback.forEach(feedback => {
-        const item = document.createElement('li');
-        item.className = feedback.type || 'info';
-        item.textContent = feedback.message;
-        feedbackList.appendChild(item);
-      });
-      
-      container.appendChild(feedbackList);
-    }
-  }
-
-  /**
-   * Reset strength meter
-   */
-  resetStrengthMeter() {
-    document.getElementById('strengthFill').style.width = '0%';
-    document.getElementById('strengthLevel').textContent = 'None';
-    document.getElementById('strengthScore').textContent = '0/100';
-    document.getElementById('passwordDetails').innerHTML = '';
-    document.getElementById('securityFeedback').innerHTML = '';
-  }
-
-  /**
-   * Copy to clipboard
-   */
-  async copyToClipboard(type) {
+  loadPreset(presetName) {
     try {
-      const elementId = type === 'password' ? 'password' : 'passphrase';
-      const text = document.getElementById(elementId).value;
+      const presets = JSON.parse(localStorage.getItem('passwordPresets') || '{}');
+      const preset = presets[presetName];
       
-      if (!text) {
-        this.showNotification(`No ${type} to copy`, 'info');
+      if (!preset) {
+        this.showNotification('Preset not found', 'error');
         return;
       }
       
-      await navigator.clipboard.writeText(text);
-      this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} copied to clipboard!`, 'success');
+      // Apply preset options
+      document.getElementById('password-length').value = preset.length;
+      document.getElementById('length-value').textContent = preset.length;
+      document.getElementById('include-lowercase').checked = preset.includeLowercase;
+      document.getElementById('include-uppercase').checked = preset.includeUppercase;
+      document.getElementById('include-numbers').checked = preset.includeNumbers;
+      document.getElementById('include-symbols').checked = preset.includeSymbols;
+      document.getElementById('exclude-ambiguous').checked = preset.excludeAmbiguous;
+      document.getElementById('enforce-complexity').checked = preset.enforceComplexity;
       
-      // Visual feedback
-      const button = document.getElementById(type === 'password' ? 'copyPassword' : 'copyPassphrase');
-      const originalText = button.textContent;
-      button.textContent = 'Copied!';
-      button.style.backgroundColor = '#2ecc71';
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.style.backgroundColor = '';
-      }, 1000);
-      
+      this.showNotification(`Preset "${presetName}" loaded successfully`, 'success');
     } catch (error) {
-      this.showNotification('Failed to copy to clipboard', 'error');
+      this.showNotification('Failed to load preset', 'error');
     }
   }
 
   /**
-   * Set generating state
+   * Initialize navigation
    */
-  setGeneratingState(isGenerating, type = 'password') {
-    const buttons = {
-      password: ['generatePassword', 'regeneratePassword'],
-      passphrase: ['generatePassphrase', 'regeneratePassphrase'],
-      batch: ['generateBatch']
-    };
-    
-    const targetButtons = buttons[type] || buttons.password;
-    
-    targetButtons.forEach(id => {
-      const button = document.getElementById(id);
-      if (button) {
-        button.disabled = isGenerating;
-        if (isGenerating) {
-          button.textContent = 'Generating...';
-          button.classList.add('generating');
-        } else {
-          button.classList.remove('generating');
-          // Reset button text
-          if (id === 'generatePassword') button.textContent = 'Generate Password';
-          else if (id === 'regeneratePassword') button.textContent = '🔄';
-          else if (id === 'generatePassphrase') button.textContent = 'Generate Passphrase';
-          else if (id === 'regeneratePassphrase') button.textContent = '🔄';
-          else if (id === 'generateBatch') button.textContent = 'Generate Batch';
-        }
-      }
-    });
-  }
-
-  /**
-   * Show regeneration suggestion
-   */
-  showRegenerationSuggestion() {
-    if (this.currentPassword) {
-      // Add visual indicator that options have changed
-      const regenerateBtn = document.getElementById('regeneratePassword');
-      if (regenerateBtn) {
-        regenerateBtn.style.backgroundColor = '#f39c12';
-        regenerateBtn.title = 'Options changed - click to regenerate';
-      }
-    }
-  }
-
-  /**
-   * Hide regeneration suggestion
-   */
-  hideRegenerationSuggestion() {
-    const regenerateBtn = document.getElementById('regeneratePassword');
-    if (regenerateBtn) {
-      regenerateBtn.style.backgroundColor = '';
-      regenerateBtn.title = 'Regenerate password';
-    }
-  }
-
-  /**
-   * Add to history
-   */
-  addToHistory(password, type) {
-    this.passwordHistory.unshift({
-      password: password,
-      type: type,
-      timestamp: new Date().toISOString()
-    });
-    
-    if (this.passwordHistory.length > this.maxHistorySize) {
-      this.passwordHistory = this.passwordHistory.slice(0, this.maxHistorySize);
-    }
-  }
-
-  /**
-   * Handle keyboard shortcuts
-   */
-  handleKeyboardShortcuts(e) {
-    if (e.ctrlKey || e.metaKey) {
-      switch (e.key) {
-        case 'g':
-          e.preventDefault();
-          this.generatePassword();
-          break;
-        case 'r':
-          e.preventDefault();
-          this.regeneratePassword();
-          break;
-        case 'c':
-          if (e.shiftKey) {
-            e.preventDefault();
-            this.copyToClipboard('password');
-          }
-          break;
-        case 'p':
-          if (e.shiftKey) {
-            e.preventDefault();
-            this.generatePassphrase();
-          }
-          break;
-        case 'b':
-          if (e.shiftKey) {
-            e.preventDefault();
-            this.generateBatchPasswords();
-          }
-          break;
-      }
-    }
-  }
-
-  /**
-   * Show notification
-   */
-  showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    // Trigger animation
-    setTimeout(() => {
-      notification.classList.add('show');
-    }, 10);
-    
-    // Remove notification after delay
-    setTimeout(() => {
-      notification.classList.remove('show');
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, 300);
-    }, 3000);
-  }
-
-  /**
-   * Validate options
-   */
-  validateOptions() {
-    const options = this.getPasswordOptions();
-    const errors = [];
-    
-    if (options.length < 4) {
-      errors.push('Password length must be at least 4 characters');
-    }
-    
-    if (options.length > 128) {
-      errors.push('Password length cannot exceed 128 characters');
-    }
-    
-    if (!options.includeUppercase && !options.includeLowercase && 
-        !options.includeNumbers && !options.includeSymbols && 
-        !options.customCharacters) {
-      errors.push('At least one character type must be selected');
-    }
-    
-    return errors;
-  }
-
-  /**
-   * Initialize tooltips
-   */
-  initializeTooltips() {
-    const tooltips = document.querySelectorAll('[data-tooltip]');
-    tooltips.forEach(element => {
-      element.addEventListener('mouseenter', (e) => {
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip';
-        tooltip.textContent = e.target.dataset.tooltip;
-        document.body.appendChild(tooltip);
-        
-        const rect = e.target.getBoundingClientRect();
-        tooltip.style.left = rect.left + 'px';
-        tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+  initializeNavigation() {
+    const backButton = document.getElementById('back-home');
+    if (backButton) {
+      backButton.addEventListener('click', () => {
+        window.location.href = '../index.html';
       });
-      
-      element.addEventListener('mouseleave', () => {
-        const tooltip = document.querySelector('.tooltip');
-        if (tooltip) {
-          tooltip.remove();
-        }
-      });
-    });
+    }
   }
 }
 

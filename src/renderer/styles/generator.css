@@ -293,6 +293,94 @@
   background-color: #bdc3c7;
 }
 
+/* Batch Actions */
+.batch-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.batch-actions button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.batch-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Batch Password Structure */
+.batch-password {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.batch-password input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: #f8f9fa;
+}
+
+.batch-strength {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 80px;
+}
+
+.strength-indicator {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.strength-indicator.very-weak {
+  background-color: #e74c3c;
+}
+
+.strength-indicator.weak {
+  background-color: #f39c12;
+}
+
+.strength-indicator.moderate {
+  background-color: #f1c40f;
+}
+
+.strength-indicator.strong {
+  background-color: #27ae60;
+}
+
+.strength-indicator.very-strong {
+  background-color: #2ecc71;
+}
+
+.strength-score {
+  font-size: 10px;
+  color: #7f8c8d;
+  font-weight: normal;
+}
+
 /* Password Details */
 .details-grid {
   display: grid;
