@@ -114,6 +114,29 @@ app.whenReady().then(async () => {
     }
   });
   
+  // Password strength analysis handler
+  ipcMain.handle('analyze-password-strength', async (event, password) => {
+    try {
+      // Use the password generator's strength analysis
+      const options = passwordGenerator.getDefaultOptions();
+      const analysis = passwordGenerator.calculatePasswordStrength(password, options);
+      
+      return {
+        success: true,
+        data: {
+          ...analysis,
+          length: password.length,
+          characterTypes: passwordGenerator.getCharacterTypes(password),
+          uniqueCharacters: [...new Set(password)].length,
+          patterns: passwordGenerator.detectPatterns(password)
+        }
+      };
+    } catch (error) {
+      console.error('Password analysis error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
   createMainWindow();
 
   app.on('activate', () => {

@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generatePassphrase: (options) => ipcRenderer.invoke('generate-passphrase', options),
   generateBatch: (count, options) => ipcRenderer.invoke('generate-batch', count, options),
   getGeneratorOptions: () => ipcRenderer.invoke('get-generator-options'),
+  analyzePasswordStrength: (password) => ipcRenderer.invoke('analyze-password-strength', password),
   
   // Master Password APIs
   hasMasterPassword: () => ipcRenderer.invoke('has-master-password'),

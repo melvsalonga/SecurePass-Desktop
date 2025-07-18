@@ -554,6 +554,110 @@ class PasswordGenerator {
   getDefaultOptions() {
     return { ...this.defaultOptions }
   }
+
+  /**
+   * Get character types present in a password
+   * @param {string} password - Password to analyze
+   * @returns {number} Number of different character types
+   */
+  getCharacterTypes(password) {
+    let types = 0
+    if (/[a-z]/.test(password)) types++
+    if (/[A-Z]/.test(password)) types++
+    if (/[0-9]/.test(password)) types++
+    if (/[^a-zA-Z0-9]/.test(password)) types++
+    return types
+  }
+
+  /**
+   * Detect patterns in password
+   * @param {string} password - Password to analyze
+   * @returns {Array} Array of detected patterns
+   */
+  detectPatterns(password) {
+    const patterns = []
+    
+    // Check for repeated characters
+    if (/(.)\1{2,}/.test(password)) {
+      patterns.push('repeated_characters')
+    }
+    
+    // Check for sequential characters
+    if (this.hasSequentialChars(password)) {
+      patterns.push('sequential_characters')
+    }
+    
+    // Check for common dictionary words
+    if (this.hasCommonWords(password)) {
+      patterns.push('dictionary_words')
+    }
+    
+    // Check for keyboard patterns
+    if (this.hasKeyboardPatterns(password)) {
+      patterns.push('keyboard_patterns')
+    }
+    
+    // Check for date patterns
+    if (this.hasDatePatterns(password)) {
+      patterns.push('date_patterns')
+    }
+    
+    return patterns
+  }
+
+  /**
+   * Check for common words in password
+   * @param {string} password - Password to check
+   * @returns {boolean} Whether password contains common words
+   */
+  hasCommonWords(password) {
+    const commonWords = [
+      'password', 'admin', 'user', 'login', 'welcome', 'secret', 'master',
+      'qwerty', 'asdfgh', 'zxcvbn', '123456', 'abcdef', 'letmein',
+      'monkey', 'shadow', 'sunshine', 'princess', 'dragon', 'football',
+      'baseball', 'superman', 'batman', 'computer', 'internet'
+    ]
+    
+    const lowerPassword = password.toLowerCase()
+    return commonWords.some(word => lowerPassword.includes(word))
+  }
+
+  /**
+   * Check for keyboard patterns
+   * @param {string} password - Password to check
+   * @returns {boolean} Whether password contains keyboard patterns
+   */
+  hasKeyboardPatterns(password) {
+    const keyboardPatterns = [
+      'qwerty', 'asdfgh', 'zxcvbn', '123456', '654321',
+      'qwertyuiop', 'asdfghjkl', 'zxcvbnm',
+      'abcdef', 'fedcba', '987654'
+    ]
+    
+    const lowerPassword = password.toLowerCase()
+    return keyboardPatterns.some(pattern => 
+      lowerPassword.includes(pattern) || 
+      lowerPassword.includes(pattern.split('').reverse().join(''))
+    )
+  }
+
+  /**
+   * Check for date patterns
+   * @param {string} password - Password to check
+   * @returns {boolean} Whether password contains date patterns
+   */
+  hasDatePatterns(password) {
+    // Check for common date patterns
+    const datePatterns = [
+      /\d{4}/, // year
+      /\d{2}\d{2}/, // mmdd, ddmm, etc.
+      /\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}/, // date formats
+      /19\d{2}/, // 19xx years
+      /20\d{2}/, // 20xx years
+    ]
+    
+    return datePatterns.some(pattern => pattern.test(password))
+  }
 }
 
 module.exports = PasswordGenerator

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Settings - SecurePass Desktop</title>
+  
+  <!-- Content Security Policy for enhanced security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/settings.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>Settings</h1>
+      <nav class="app-nav">
+        <button id="back-home" class="btn btn-secondary">← Back to Home</button>
+      </nav>
+    </header>
+    
+    <main class="app-main">
+      <div class="settings-container">
+        <!-- General Settings -->
+        <section class="settings-section">
+          <h2>General Settings</h2>
+          
+          <div class="setting-group">
+            <label for="theme-select">Theme:</label>
+            <select id="theme-select">
+              <option value="system">System Default</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          
+          <div class="setting-group">
+            <label for="language-select">Language:</label>
+            <select id="language-select">
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+            </select>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="start-minimized">
+              Start minimized to system tray
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="minimize-to-tray">
+              Minimize to system tray on close
+            </label>
+          </div>
+        </section>
+        
+        <!-- Security Settings -->
+        <section class="settings-section">
+          <h2>Security Settings</h2>
+          
+          <div class="setting-group">
+            <label for="auto-lock-timeout">Auto-lock timeout (minutes):</label>
+            <div class="input-with-slider">
+              <input type="range" id="auto-lock-timeout" min="1" max="60" value="15">
+              <span id="auto-lock-value">15</span>
+            </div>
+          </div>
+          
+          <div class="setting-group">
+            <label for="clipboard-timeout">Clipboard clear timeout (seconds):</label>
+            <div class="input-with-slider">
+              <input type="range" id="clipboard-timeout" min="10" max="120" value="30">
+              <span id="clipboard-value">30</span>
+            </div>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="show-password-strength">
+              Show password strength meter
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="check-password-breaches">
+              Check for password breaches (requires internet)
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="secure-desktop">
+              Enable secure desktop mode
+            </label>
+          </div>
+        </section>
+        
+        <!-- Password Generation Defaults -->
+        <section class="settings-section">
+          <h2>Password Generation Defaults</h2>
+          
+          <div class="setting-group">
+            <label for="default-length">Default password length:</label>
+            <div class="input-with-slider">
+              <input type="range" id="default-length" min="8" max="128" value="16">
+              <span id="default-length-value">16</span>
+            </div>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="default-uppercase" checked>
+              Include uppercase letters by default
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="default-lowercase" checked>
+              Include lowercase letters by default
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="default-numbers" checked>
+              Include numbers by default
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="default-symbols" checked>
+              Include symbols by default
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="default-exclude-ambiguous" checked>
+              Exclude ambiguous characters by default
+            </label>
+          </div>
+        </section>
+        
+        <!-- Privacy Settings -->
+        <section class="settings-section">
+          <h2>Privacy Settings</h2>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="enable-analytics">
+              Enable anonymous usage analytics
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="crash-reporting">
+              Enable crash reporting
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label for="history-retention">Password history retention (days):</label>
+            <div class="input-with-slider">
+              <input type="range" id="history-retention" min="7" max="365" value="90">
+              <span id="history-retention-value">90</span>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Advanced Settings -->
+        <section class="settings-section">
+          <h2>Advanced Settings</h2>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="hardware-acceleration">
+              Enable hardware acceleration
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label>
+              <input type="checkbox" id="debug-mode">
+              Enable debug mode
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label for="memory-limit">Memory limit (MB):</label>
+            <div class="input-with-slider">
+              <input type="range" id="memory-limit" min="64" max="512" value="128">
+              <span id="memory-limit-value">128</span>
+            </div>
+          </div>
+          
+          <div class="setting-group">
+            <button id="reset-settings" class="btn btn-danger">Reset All Settings</button>
+          </div>
+        </section>
+        
+        <!-- Action Buttons -->
+        <section class="settings-actions">
+          <button id="save-settings" class="btn btn-primary">Save Settings</button>
+          <button id="cancel-settings" class="btn btn-secondary">Cancel</button>
+          <button id="export-settings" class="btn btn-secondary">Export Settings</button>
+          <button id="import-settings" class="btn btn-secondary">Import Settings</button>
+        </section>
+      </div>
+    </main>
+    
+    <!-- Notification area -->
+    <div id="notification" class="notification"></div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="../js/settings.js"></script>
+</body>
+</html>

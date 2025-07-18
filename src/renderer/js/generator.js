@@ -99,6 +99,9 @@ class PasswordGeneratorUI {
         this.updatePasswordDetails(response.data);
         this.addToHistory(response.data.password, 'password');
         this.showNotification('Password generated successfully!', 'success');
+        
+        // Analyze password strength
+        await this.analyzePasswordStrength(response.data.password);
       } else {
         this.showNotification(response.error || 'Failed to generate password', 'error');
       }
@@ -440,6 +443,54 @@ class PasswordGeneratorUI {
           }
           break;
       }
+    }
+  }
+
+  /**
+   * Analyze password strength
+   */
+  async analyzePasswordStrength(password) {
+    try {
+      const response = await window.electronAPI.analyzePasswordStrength(password);
+      
+      if (response.success) {
+        this.updatePasswordDetails(response.data);
+        this.updateSecurityFeedback(response.data);
+      } else {
+        console.error('Password analysis failed:', response.error);
+      }
+    } catch (error) {
+      console.error('Error analyzing password strength:', error);
+    }
+  }
+
+  /**
+   * Update security feedback
+   */
+  updateSecurityFeedback(analysis) {
+    const container = document.getElementById('security-feedback');
+    container.innerHTML = '';
+    
+    if (analysis.feedback && analysis.feedback.length > 0) {
+      analysis.feedback.forEach(feedback => {
+        const li = document.createElement('li');
+        li.className = 'feedback-item';
+        li.textContent = feedback;
+        container.appendChild(li);
+      });
+    } else {
+      const li = document.createElement('li');
+      li.textContent = 'No security issues detected';
+      li.className = 'feedback-item success';
+      container.appendChild(li);
+    }
+    
+    // Update patterns if found
+    if (analysis.patterns && analysis.patterns.length > 0) {
+      const patternsLi = document.createElement('li');
+      patternsLi.className = 'feedback-item warning';
+      patternsLi.textContent = `Detected patterns: ${analysis.patterns.join(', ')}`;
+      container.appendChild(patternsLi);
     }
   }
 
