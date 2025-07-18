@@ -113,8 +113,7 @@ class EncryptionManager {
    */
   encrypt(data, key, iv) {
     try {
-      const cipher = crypto.createCipher(this.algorithm, key);
-      cipher.setAutoPadding(true);
+      const cipher = crypto.createCipherGCM(this.algorithm, key, iv);
       
       // Convert string to buffer if needed
       const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
@@ -149,7 +148,7 @@ class EncryptionManager {
         throw new Error('Unsupported encryption algorithm');
       }
       
-      const decipher = crypto.createDecipher(algorithm, key);
+      const decipher = crypto.createDecipherGCM(algorithm, key, iv);
       decipher.setAuthTag(authTag);
       
       let decrypted = decipher.update(encrypted);
