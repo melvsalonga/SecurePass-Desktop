@@ -15,29 +15,39 @@ class PasswordStorageManager {
   }
 
   /**
-   * Load passwords from storage
+   * Initialize password database with encryption key
+   * @param {Buffer} databaseKey - Database encryption key
    */
-  loadPasswords() {
+  async initialize(databaseKey) {
     try {
-      // For now, use in-memory storage
-      // In a real implementation, this would load from encrypted database
-      this.passwords = [];
+      if (!databaseKey) {
+        throw new Error('Database key is required');
+      }
+      
+      this.passwordDatabase = new PasswordDatabase(this.encryptionManager, databaseKey);
+      this.isInitialized = true;
+      
+      console.log('PasswordStorageManager initialized with encrypted database');
     } catch (error) {
-      console.error('Error loading passwords:', error);
-      this.passwords = [];
+      console.error('Error initializing password storage:', error);
+      throw new Error(`Failed to initialize password storage: ${error.message}`);
     }
   }
 
   /**
-   * Save passwords to storage
+   * Check if password storage is initialized
+   * @returns {boolean} True if initialized
    */
-  savePasswords() {
-    try {
-      // For now, just log that we're saving
-      // In a real implementation, this would save to encrypted database
-      console.log(`Saving ${this.passwords.length} password entries`);
-    } catch (error) {
-      console.error('Error saving passwords:', error);
+  isReady() {
+    return this.isInitialized && this.passwordDatabase !== null;
+  }
+
+  /**
+   * Ensure database is ready for operations
+   */
+  ensureReady() {
+    if (!this.isReady()) {
+      throw new Error('Password storage not initialized. Please authenticate first.');
     }
   }
 
@@ -48,36 +58,8 @@ class PasswordStorageManager {
    */
   async addPassword(entry) {
     try {
-      // Validate entry
-      this.validatePasswordEntry(entry);
-
-      // Generate unique ID
-      const id = this.generateId();
-
-      // Encrypt sensitive fields
-      const encryptedEntry = await this.encryptPasswordEntry({
-        ...entry,
-        id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-
-      // Add to storage
-      this.passwords.push(encryptedEntry);
-      this.savePasswords();
-
-      console.log(`Password entry added: ${entry.title}`);
-
-      return {
-        id,
-        title: entry.title,
-        username: entry.username,
-        url: entry.url,
-        category: entry.category,
-        tags: entry.tags,
-        createdAt: encryptedEntry.createdAt,
-        updatedAt: encryptedEntry.updatedAt
-      };
+      this.ensureReady();
+      return await this.passwordDatabase.addEntry(entry);
     } catch (error) {
       throw new Error(`Failed to add password: ${error.message}`);
     }
@@ -89,14 +71,8 @@ class PasswordStorageManager {
    */
   async getAllPasswords() {
     try {
-      const decryptedPasswords = [];
-
-      for (const encryptedEntry of this.passwords) {
-        const decryptedEntry = await this.decryptPasswordEntry(encryptedEntry);
-        decryptedPasswords.push(decryptedEntry);
-      }
-
-      return decryptedPasswords;
+      this.ensureReady();
+      return await this.passwordDatabase.getAllEntries();
     } catch (error) {
       throw new Error(`Failed to get passwords: ${error.message}`);
     }
@@ -109,13 +85,8 @@ class PasswordStorageManager {
    */
   async getPasswordById(id) {
     try {
-      const encryptedEntry = this.passwords.find(entry => entry.id === id);
-      
-      if (!encryptedEntry) {
-        return null;
-      }
-
-      return await this.decryptPasswordEntry(encryptedEntry);
+      this.ensureReady();
+      return await this.passwordDatabase.getEntryById(id);
     } catch (error) {
       throw new Error(`Failed to get password: ${error.message}`);
     }
@@ -129,43 +100,8 @@ class PasswordStorageManager {
    */
   async updatePassword(id, updates) {
     try {
-      const index = this.passwords.findIndex(entry => entry.id === id);
-      
-      if (index === -1) {
-        throw new Error('Password entry not found');
-      }
-
-      // Get current entry and decrypt
-      const currentEntry = await this.decryptPasswordEntry(this.passwords[index]);
-      
-      // Merge updates
-      const updatedEntry = {
-        ...currentEntry,
-        ...updates,
-        id, // Ensure ID doesn't change
-        updatedAt: new Date().toISOString()
-      };
-
-      // Validate updated entry
-      this.validatePasswordEntry(updatedEntry);
-
-      // Encrypt and store
-      const encryptedEntry = await this.encryptPasswordEntry(updatedEntry);
-      this.passwords[index] = encryptedEntry;
-      this.savePasswords();
-
-      console.log(`Password entry updated: ${updatedEntry.title}`);
-
-      return {
-        id: updatedEntry.id,
-        title: updatedEntry.title,
-        username: updatedEntry.username,
-        url: updatedEntry.url,
-        category: updatedEntry.category,
-        tags: updatedEntry.tags,
-        createdAt: updatedEntry.createdAt,
-        updatedAt: updatedEntry.updatedAt
-      };
+      this.ensureReady();
+      return await this.passwordDatabase.updateEntry(id, updates);
     } catch (error) {
       throw new Error(`Failed to update password: ${error.message}`);
     }
@@ -178,18 +114,8 @@ class PasswordStorageManager {
    */
   async deletePassword(id) {
     try {
-      const index = this.passwords.findIndex(entry => entry.id === id);
-      
-      if (index === -1) {
-        throw new Error('Password entry not found');
-      }
-
-      const entry = this.passwords[index];
-      this.passwords.splice(index, 1);
-      this.savePasswords();
-
-      console.log(`Password entry deleted: ${id}`);
-      return true;
+      this.ensureReady();
+      return await this.passwordDatabase.deleteEntry(id);
     } catch (error) {
       throw new Error(`Failed to delete password: ${error.message}`);
     }
@@ -203,48 +129,8 @@ class PasswordStorageManager {
    */
   async searchPasswords(query, filters = {}) {
     try {
-      let allPasswords = await this.getAllPasswords();
-
-      // Apply text search
-      if (query && query.trim()) {
-        const searchTerm = query.toLowerCase().trim();
-        allPasswords = allPasswords.filter(entry => {
-          return (
-            entry.title.toLowerCase().includes(searchTerm) ||
-            entry.username.toLowerCase().includes(searchTerm) ||
-            entry.url.toLowerCase().includes(searchTerm) ||
-            entry.notes.toLowerCase().includes(searchTerm) ||
-            entry.tags.some(tag => tag.toLowerCase().includes(searchTerm))
-          );
-        });
-      }
-
-      // Apply filters
-      if (filters.category) {
-        allPasswords = allPasswords.filter(entry => entry.category === filters.category);
-      }
-
-      if (filters.tags && filters.tags.length > 0) {
-        allPasswords = allPasswords.filter(entry => 
-          filters.tags.some(tag => entry.tags.includes(tag))
-        );
-      }
-
-      if (filters.startDate) {
-        const startDate = new Date(filters.startDate);
-        allPasswords = allPasswords.filter(entry => 
-          new Date(entry.createdAt) >= startDate
-        );
-      }
-
-      if (filters.endDate) {
-        const endDate = new Date(filters.endDate);
-        allPasswords = allPasswords.filter(entry => 
-          new Date(entry.createdAt) <= endDate
-        );
-      }
-
-      return allPasswords;
+      this.ensureReady();
+      return await this.passwordDatabase.searchEntries(query, filters);
     } catch (error) {
       throw new Error(`Failed to search passwords: ${error.message}`);
     }
@@ -255,7 +141,10 @@ class PasswordStorageManager {
    * @returns {Array} Array of categories
    */
   getCategories() {
-    return Array.from(this.categories);
+    if (!this.isReady()) {
+      return ['General', 'Social Media', 'Banking', 'Work', 'Shopping', 'Email', 'Entertainment'];
+    }
+    return this.passwordDatabase.getCategories();
   }
 
   /**
@@ -263,8 +152,8 @@ class PasswordStorageManager {
    * @param {string} category - Category name
    */
   addCategory(category) {
-    if (category && category.trim()) {
-      this.categories.add(category.trim());
+    if (this.isReady() && category && category.trim()) {
+      this.passwordDatabase.addCategory(category.trim());
     }
   }
 
@@ -274,54 +163,8 @@ class PasswordStorageManager {
    */
   async getStatistics() {
     try {
-      const allPasswords = await this.getAllPasswords();
-      
-      const stats = {
-        totalPasswords: allPasswords.length,
-        categoryCounts: {},
-        averagePasswordAge: 0,
-        weakPasswords: 0,
-        duplicatePasswords: 0,
-        oldestPassword: null,
-        newestPassword: null
-      };
-
-      if (allPasswords.length === 0) {
-        return stats;
-      }
-
-      // Category counts
-      allPasswords.forEach(entry => {
-        stats.categoryCounts[entry.category] = (stats.categoryCounts[entry.category] || 0) + 1;
-      });
-
-      // Password age analysis
-      const now = Date.now();
-      let totalAge = 0;
-      let oldestDate = now;
-      let newestDate = 0;
-
-      allPasswords.forEach(entry => {
-        const createdAt = new Date(entry.createdAt).getTime();
-        totalAge += now - createdAt;
-        
-        if (createdAt < oldestDate) {
-          oldestDate = createdAt;
-          stats.oldestPassword = entry.title;
-        }
-        
-        if (createdAt > newestDate) {
-          newestDate = createdAt;
-          stats.newestPassword = entry.title;
-        }
-      });
-
-      stats.averagePasswordAge = Math.floor(totalAge / allPasswords.length / (1000 * 60 * 60 * 24)); // Days
-
-      // TODO: Implement weak password detection
-      // TODO: Implement duplicate password detection
-
-      return stats;
+      this.ensureReady();
+      return await this.passwordDatabase.getStatistics();
     } catch (error) {
       throw new Error(`Failed to get statistics: ${error.message}`);
     }

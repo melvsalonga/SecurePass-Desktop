@@ -65,6 +65,13 @@ app.whenReady().then(async () => {
   ipcMain.handle('authenticate', async (event, username, password) => {
     try {
       const result = await databaseManager.authenticateUser(username, password);
+      
+      // Initialize password storage manager with database key
+      if (result.authenticated && databaseManager.databaseKey) {
+        await passwordStorageManager.initialize(databaseManager.databaseKey);
+        console.log('Password storage initialized after successful authentication');
+      }
+      
       return { success: true, data: result };
     } catch (error) {
       console.error('Authentication error:', error);
