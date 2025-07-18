@@ -1,4 +1,4 @@
-const Database = require('better-sqlite3');
+// const Database = require('better-sqlite3'); // Commented out for now
 const path = require('node:path');
 const fs = require('node:fs');
 const { app } = require('electron');

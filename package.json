@@ -51,21 +51,24 @@
       "category": "public.app-category.utilities"
     },
     "win": {
-      "target": "nsis"
+      "target": "portable",
+      "forceCodeSigning": false
     },
     "linux": {
       "target": "AppImage"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "dependencies": {
-    "argon2": "^0.43.1",
-    "better-sqlite3": "^12.2.0",
-    "electron": "^37.2.3"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.28.0",
     "babel-loader": "^10.0.0",
+    "electron": "^37.2.3",
     "electron-builder": "^26.0.12",
     "eslint": "^9.31.0",
     "jest": "^30.0.4",

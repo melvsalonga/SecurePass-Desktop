@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const PasswordGenerator = require('../shared/password-generator');
 const EncryptionManager = require('./encryption');
-const DatabaseManager = require('./database');
+const SimpleDatabaseManager = require('./simpleDatabaseManager');
 
 // Function to create main application window
 const createMainWindow = () => {
@@ -26,7 +26,7 @@ const passwordGenerator = new PasswordGenerator();
 
 // Initialize encryption and database managers
 const encryptionManager = new EncryptionManager();
-const databaseManager = new DatabaseManager();
+const databaseManager = new SimpleDatabaseManager();
 
 // Handle app ready event
 app.whenReady().then(async () => {
