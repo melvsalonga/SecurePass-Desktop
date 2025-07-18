@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Authentication - SecurePass Desktop</title>
+  
+  <!-- Content Security Policy for enhanced security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/master-password.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>SecurePass Desktop</h1>
+      <p>Authentication Required</p>
+    </header>
+    
+    <main class="app-main">
+      <div class="master-password-container">
+        <div class="master-password-form">
+          <h2>Sign In</h2>
+          <p>Enter your master password to access your secure vault</p>
+          
+          <form id="auth-form">
+            <div class="form-group">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Master Password:</label>
+              <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Sign In</button>
+              <button type="button" id="back-home" class="btn btn-secondary">Back to Home</button>
+            </div>
+          </form>
+          
+          <div id="auth-result" class="result-message"></div>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Notification area -->
+    <div id="notification" class="notification"></div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="../js/authenticate.js"></script>
+</body>
+</html>

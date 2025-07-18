@@ -35,6 +35,17 @@ app.whenReady().then(async () => {
   // Basic IPC handlers
   ipcMain.handle('ping', () => 'pong');
   
+  // Check if master password exists
+  ipcMain.handle('has-master-password', async () => {
+    try {
+      const result = await databaseManager.hasMasterPassword();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Check master password error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
   // Master password setup
   ipcMain.handle('set-master-password', async (event, username, password) => {
     try {

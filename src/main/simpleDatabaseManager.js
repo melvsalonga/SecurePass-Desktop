@@ -78,6 +78,14 @@ class SimpleDatabaseManager {
   }
 
   /**
+   * Check if master password exists
+   * @returns {boolean} True if master password exists
+   */
+  hasMasterPassword() {
+    return this.users.length > 0;
+  }
+
+  /**
    * Set database encryption key
    * @param {Buffer} key - Database encryption key
    */

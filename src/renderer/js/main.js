@@ -135,7 +135,13 @@ class SecurePassRenderer {
       this.showResult('🚀 Getting started...', 'info');
       
       // Check if master password is already set
-      const hasMasterPassword = await window.electronAPI.hasMasterPassword();
+      const response = await window.electronAPI.hasMasterPassword();
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to check master password status');
+      }
+      
+      const hasMasterPassword = response.data;
       
       if (hasMasterPassword) {
         // Navigate to authentication page
