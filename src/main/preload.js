@@ -13,8 +13,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // IPC methods
   ping: () => ipcRenderer.invoke('ping'),
   
-  // Password Management APIs (to be implemented)
+  // Password Generation APIs
   generatePassword: (options) => ipcRenderer.invoke('generate-password', options),
+  generatePassphrase: (options) => ipcRenderer.invoke('generate-passphrase', options),
+  generateBatch: (count, options) => ipcRenderer.invoke('generate-batch', count, options),
+  getGeneratorOptions: () => ipcRenderer.invoke('get-generator-options'),
+  
+  // Password Management APIs (to be implemented)
   savePassword: (entry) => ipcRenderer.invoke('save-password', entry),
   getPasswords: () => ipcRenderer.invoke('get-passwords'),
   deletePassword: (id) => ipcRenderer.invoke('delete-password', id),

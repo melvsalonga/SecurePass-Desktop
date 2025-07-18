@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Password Generator - SecurePass Desktop</title>
+  
+  <!-- Content Security Policy for enhanced security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/generator.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>Password Generator</h1>
+      <nav class="app-nav">
+        <button id="back-home" class="btn btn-secondary">← Back to Home</button>
+      </nav>
+    </header>
+    
+    <main class="app-main">
+      <div class="generator-container">
+        <!-- Password Generation Section -->
+        <section class="generator-section">
+          <h2>Generate Secure Password</h2>
+          
+          <div class="password-output">
+            <div class="password-field">
+              <input type="text" id="generated-password" readonly placeholder="Click 'Generate' to create a password">
+              <button id="copy-password" class="btn btn-icon" title="Copy to clipboard">📋</button>
+              <button id="generate-password" class="btn btn-primary">Generate</button>
+            </div>
+            
+            <div class="strength-meter">
+              <div class="strength-bar">
+                <div id="strength-fill" class="strength-fill"></div>
+              </div>
+              <div class="strength-info">
+                <span id="strength-level">No password generated</span>
+                <span id="strength-score"></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Password Options -->
+          <div class="options-grid">
+            <div class="option-group">
+              <label for="password-length">Length: <span id="length-value">16</span></label>
+              <input type="range" id="password-length" min="4" max="128" value="16">
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="include-lowercase" checked>
+                Include Lowercase (a-z)
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="include-uppercase" checked>
+                Include Uppercase (A-Z)
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="include-numbers" checked>
+                Include Numbers (0-9)
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="include-symbols" checked>
+                Include Symbols (!@#$...)
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="exclude-ambiguous" checked>
+                Exclude Ambiguous (il1Lo0O)
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="enforce-complexity" checked>
+                Enforce Complexity Rules
+              </label>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Passphrase Generation Section -->
+        <section class="generator-section">
+          <h2>Generate Passphrase</h2>
+          
+          <div class="password-output">
+            <div class="password-field">
+              <input type="text" id="generated-passphrase" readonly placeholder="Click 'Generate' to create a passphrase">
+              <button id="copy-passphrase" class="btn btn-icon" title="Copy to clipboard">📋</button>
+              <button id="generate-passphrase" class="btn btn-primary">Generate</button>
+            </div>
+            
+            <div class="strength-meter">
+              <div class="strength-bar">
+                <div id="passphrase-strength-fill" class="strength-fill"></div>
+              </div>
+              <div class="strength-info">
+                <span id="passphrase-strength-level">No passphrase generated</span>
+                <span id="passphrase-strength-score"></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Passphrase Options -->
+          <div class="options-grid">
+            <div class="option-group">
+              <label for="word-count">Word Count: <span id="word-count-value">6</span></label>
+              <input type="range" id="word-count" min="3" max="12" value="6">
+            </div>
+            
+            <div class="option-group">
+              <label for="word-separator">Separator:</label>
+              <select id="word-separator">
+                <option value="-">Hyphen (-)</option>
+                <option value="_">Underscore (_)</option>
+                <option value=" ">Space ( )</option>
+                <option value=".">Period (.)</option>
+                <option value="">None</option>
+              </select>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="capitalize-words">
+                Capitalize First Letter
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="include-number">
+                Include Number
+              </label>
+            </div>
+            
+            <div class="option-group">
+              <label>
+                <input type="checkbox" id="include-symbol">
+                Include Symbol
+              </label>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Batch Generation Section -->
+        <section class="generator-section">
+          <h2>Batch Generation</h2>
+          
+          <div class="batch-controls">
+            <div class="option-group">
+              <label for="batch-count">Number of Passwords: <span id="batch-count-value">5</span></label>
+              <input type="range" id="batch-count" min="1" max="20" value="5">
+            </div>
+            
+            <button id="generate-batch" class="btn btn-primary">Generate Batch</button>
+          </div>
+          
+          <div id="batch-results" class="batch-results"></div>
+        </section>
+        
+        <!-- Password Details Section -->
+        <section class="generator-section" id="password-details" style="display: none;">
+          <h2>Password Analysis</h2>
+          
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Entropy:</span>
+              <span id="password-entropy">-</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Character Set Size:</span>
+              <span id="charset-size">-</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Time to Crack:</span>
+              <span id="time-to-crack">-</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="detail-label">Generated:</span>
+              <span id="generation-time">-</span>
+            </div>
+          </div>
+          
+          <div class="feedback-section">
+            <h3>Security Feedback</h3>
+            <ul id="security-feedback"></ul>
+          </div>
+        </section>
+      </div>
+    </main>
+    
+    <!-- Notification area -->
+    <div id="notification" class="notification"></div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="../js/generator.js"></script>
+</body>
+</html>
