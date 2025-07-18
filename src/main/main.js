@@ -137,6 +137,17 @@ app.whenReady().then(async () => {
     }
   });
   
+  // Change master password handler
+  ipcMain.handle('change-master-password', async (event, oldPassword, newPassword) => {
+    try {
+      const result = await databaseManager.changeMasterPassword(oldPassword, newPassword);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Change master password error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
   createMainWindow();
 
   app.on('activate', () => {

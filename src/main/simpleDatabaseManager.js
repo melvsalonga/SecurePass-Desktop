@@ -222,6 +222,61 @@ class SimpleDatabaseManager {
   }
 
   /**
+   * Change master password for a user
+   * @param {string} oldPassword - Current master password
+   * @param {string} newPassword - New master password
+   * @returns {Promise<Object>} Change result
+   */
+  async changeMasterPassword(oldPassword, newPassword) {
+    try {
+      // Find the current user (simplified - assuming single user)
+      const user = this.users[0];
+      if (!user) {
+        throw new Error('No user found');
+      }
+      
+      // Verify old password
+      const salt = Buffer.from(user.salt, 'base64');
+      const storedHash = Buffer.from(user.masterPasswordHash, 'base64');
+      
+      const isValid = await this.encryptionManager.verifyPassword(oldPassword, storedHash, salt);
+      if (!isValid) {
+        throw new Error('Current password is incorrect');
+      }
+      
+      // Generate new salt and hash for new password
+      const newSalt = this.encryptionManager.generateSalt();
+      const newPasswordHash = await this.encryptionManager.hashPassword(newPassword, newSalt);
+      
+      // Create new database key with new password
+      const newKeyPackage = await this.encryptionManager.createDatabaseKey(newPassword, newSalt);
+      
+      // Update user record
+      user.masterPasswordHash = newPasswordHash.toString('base64');
+      user.salt = newSalt.toString('base64');
+      user.keyData = JSON.stringify(newKeyPackage);
+      user.updatedAt = new Date().toISOString();
+      
+      // Save changes
+      this.saveDatabase();
+      
+      // Update session with new key
+      const databaseKey = await this.encryptionManager.decryptDatabaseKey(newKeyPackage, newPassword);
+      this.setDatabaseKey(databaseKey);
+      
+      console.log(`Master password changed successfully for user: ${user.username}`);
+      
+      return {
+        username: user.username,
+        changedAt: user.updatedAt,
+        message: 'Master password changed successfully'
+      };
+    } catch (error) {
+      throw new Error(`Password change failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Get all users (for testing purposes)
    * @returns {Array} Array of users
    */
