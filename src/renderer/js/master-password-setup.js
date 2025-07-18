@@ -186,6 +186,13 @@ class MasterPasswordSetup {
     // Check if password is valid
     this.isPasswordValid = Object.values(requirements).every(Boolean) && password.length > 0;
     this.masterPassword = password;
+    
+    // Re-validate confirmation password when master password changes
+    const confirmPasswordField = document.getElementById('confirm-password');
+    if (confirmPasswordField.value) {
+      this.validatePasswordConfirmation(confirmPasswordField.value);
+    }
+    
     this.validateForm();
   }
 
@@ -195,12 +202,14 @@ class MasterPasswordSetup {
    */
   validatePasswordConfirmation(confirmPassword) {
     const statusElement = document.getElementById('password-match-status');
+    const masterPasswordField = document.getElementById('master-password');
+    const currentMasterPassword = masterPasswordField.value;
     
     if (confirmPassword === '') {
       statusElement.textContent = '';
       statusElement.className = 'password-status';
       this.isConfirmValid = false;
-    } else if (confirmPassword === this.masterPassword) {
+    } else if (confirmPassword === currentMasterPassword) {
       statusElement.textContent = '✓ Passwords match';
       statusElement.className = 'password-status match';
       this.isConfirmValid = true;

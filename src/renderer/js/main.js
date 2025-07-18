@@ -167,16 +167,16 @@ class SecurePassRenderer {
       
       switch (page) {
         case 'master-password-setup':
-          pagePath = '../pages/master-password-setup.html';
+          pagePath = 'src/renderer/pages/master-password-setup.html';
           break;
         case 'authenticate':
-          pagePath = '../pages/authenticate.html';
+          pagePath = 'src/renderer/pages/authenticate.html';
           break;
         case 'master-password-change':
-          pagePath = '../pages/master-password-change.html';
+          pagePath = 'src/renderer/pages/change-master-password.html';
           break;
         case 'dashboard':
-          pagePath = '../pages/dashboard.html';
+          pagePath = 'src/renderer/pages/dashboard.html';
           break;
         default:
           throw new Error('Unknown page: ' + page);
