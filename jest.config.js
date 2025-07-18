@@ -32,7 +32,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   
   // Module paths
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
   

@@ -3,13 +3,12 @@
  * Handles all UI interactions and communication with the main process
  */
 
-const { ipcRenderer } = require('electron');
-
 class PasswordGeneratorUI {
   constructor() {
     this.initializeEventListeners();
     this.setupDefaults();
     this.currentPassword = '';
+    this.currentPassphrase = '';
     this.passwordHistory = [];
     this.maxHistorySize = 50;
   }
@@ -19,57 +18,45 @@ class PasswordGeneratorUI {
    */
   initializeEventListeners() {
     // Password generation
-    document.getElementById('generatePassword').addEventListener('click', () => {
+    document.getElementById('generate-password').addEventListener('click', () => {
       this.generatePassword();
     });
 
     // Copy buttons
-    document.getElementById('copyPassword').addEventListener('click', () => {
+    document.getElementById('copy-password').addEventListener('click', () => {
       this.copyToClipboard('password');
     });
 
-    document.getElementById('copyPassphrase').addEventListener('click', () => {
+    document.getElementById('copy-passphrase').addEventListener('click', () => {
       this.copyToClipboard('passphrase');
     });
 
-    // Regenerate buttons
-    document.getElementById('regeneratePassword').addEventListener('click', () => {
-      this.regeneratePassword();
-    });
-
-    document.getElementById('regeneratePassphrase').addEventListener('click', () => {
-      this.regeneratePassphrase();
-    });
-
     // Passphrase generation
-    document.getElementById('generatePassphrase').addEventListener('click', () => {
+    document.getElementById('generate-passphrase').addEventListener('click', () => {
       this.generatePassphrase();
     });
 
     // Batch generation
-    document.getElementById('generateBatch').addEventListener('click', () => {
+    document.getElementById('generate-batch').addEventListener('click', () => {
       this.generateBatchPasswords();
     });
 
-    document.getElementById('copyAllBatch').addEventListener('click', () => {
-      this.copyAllBatchPasswords();
-    });
-
-    document.getElementById('clearBatch').addEventListener('click', () => {
-      this.clearBatchResults();
-    });
-
     // Length slider updates
-    document.getElementById('length').addEventListener('input', (e) => {
-      document.getElementById('lengthValue').textContent = e.target.value;
+    document.getElementById('password-length').addEventListener('input', (e) => {
+      document.getElementById('length-value').textContent = e.target.value;
+      this.showRegenerationSuggestion();
     });
 
-    document.getElementById('passphraseWords').addEventListener('input', (e) => {
-      document.getElementById('passphraseWordsValue').textContent = e.target.value;
+    document.getElementById('word-count').addEventListener('input', (e) => {
+      document.getElementById('word-count-value').textContent = e.target.value;
     });
 
-    // Real-time strength analysis
-    document.getElementById('password').addEventListener('input', (e) => {
+    document.getElementById('batch-count').addEventListener('input', (e) => {
+      document.getElementById('batch-count-value').textContent = e.target.value;
+    });
+
+    // Real-time strength analysis on password field
+    document.getElementById('generated-password').addEventListener('input', (e) => {
       if (e.target.value) {
         this.analyzePasswordStrength(e.target.value);
       } else {
