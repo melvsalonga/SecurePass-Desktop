@@ -19,14 +19,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateBatch: (count, options) => ipcRenderer.invoke('generate-batch', count, options),
   getGeneratorOptions: () => ipcRenderer.invoke('get-generator-options'),
   
+  // Master Password APIs
+  setMasterPassword: (username, password) => ipcRenderer.invoke('set-master-password', username, password),
+  authenticate: (username, password) => ipcRenderer.invoke('authenticate', username, password),
+  
   // Password Management APIs (to be implemented)
   savePassword: (entry) => ipcRenderer.invoke('save-password', entry),
   getPasswords: () => ipcRenderer.invoke('get-passwords'),
   deletePassword: (id) => ipcRenderer.invoke('delete-password', id),
-  
-  // Security APIs (to be implemented)
-  verifyMasterPassword: (password) => ipcRenderer.invoke('verify-master-password', password),
-  setMasterPassword: (password) => ipcRenderer.invoke('set-master-password', password),
   
   // Event listeners
   onPasswordGenerated: (callback) => ipcRenderer.on('password-generated', (_event, password) => callback(password)),
