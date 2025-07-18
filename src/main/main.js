@@ -1,6 +1,8 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
-const path = require('node:path')
-const PasswordGenerator = require('../shared/password-generator')
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('node:path');
+const PasswordGenerator = require('../shared/password-generator');
+const EncryptionManager = require('./encryption');
+const DatabaseManager = require('./database');
 
 // Function to create main application window
 const createMainWindow = () => {
@@ -14,49 +16,77 @@ const createMainWindow = () => {
       nodeIntegration: false,
       sandbox: true
     }
-  })
+  });
 
-  win.loadFile('index.html')
-}
+  win.loadFile('index.html');
+};
 
 // Initialize password generator
-const passwordGenerator = new PasswordGenerator()
+const passwordGenerator = new PasswordGenerator();
+
+// Initialize encryption and database managers
+const encryptionManager = new EncryptionManager();
+const databaseManager = new DatabaseManager();
 
 // Handle app ready event
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await databaseManager.initialize();
+
   // Basic IPC handlers
-  ipcMain.handle('ping', () => 'pong')
+  ipcMain.handle('ping', () => 'pong');
   
+  // Master password setup
+  ipcMain.handle('set-master-password', async (event, username, password) => {
+    try {
+      const result = await databaseManager.createUser(username, password);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Master password setup error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Authentication
+  ipcMain.handle('authenticate', async (event, username, password) => {
+    try {
+      const result = await databaseManager.authenticateUser(username, password);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Authentication error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   // Password generation handlers
   ipcMain.handle('generate-password', async (event, options) => {
     try {
-      const result = passwordGenerator.generatePassword(options)
-      return { success: true, data: result }
+      const result = passwordGenerator.generatePassword(options);
+      return { success: true, data: result };
     } catch (error) {
-      console.error('Password generation error:', error)
-      return { success: false, error: error.message }
+      console.error('Password generation error:', error);
+      return { success: false, error: error.message };
     }
-  })
+  });
   
   ipcMain.handle('generate-passphrase', async (event, options) => {
     try {
-      const result = passwordGenerator.generatePassphrase(options)
-      return { success: true, data: result }
+      const result = passwordGenerator.generatePassphrase(options);
+      return { success: true, data: result };
     } catch (error) {
-      console.error('Passphrase generation error:', error)
-      return { success: false, error: error.message }
+      console.error('Passphrase generation error:', error);
+      return { success: false, error: error.message };
     }
-  })
+  });
   
   ipcMain.handle('generate-batch', async (event, count, options) => {
     try {
-      const result = passwordGenerator.generateBatch(count, options)
-      return { success: true, data: result }
+      const result = passwordGenerator.generateBatch(count, options);
+      return { success: true, data: result };
     } catch (error) {
-      console.error('Batch generation error:', error)
-      return { success: false, error: error.message }
+      console.error('Batch generation error:', error);
+      return { success: false, error: error.message };
     }
-  })
+  });
   
   ipcMain.handle('get-generator-options', async () => {
     try {
@@ -66,26 +96,26 @@ app.whenReady().then(() => {
           defaultOptions: passwordGenerator.getDefaultOptions(),
           characterSets: passwordGenerator.getCharacterSets()
         }
-      }
+      };
     } catch (error) {
-      console.error('Get options error:', error)
-      return { success: false, error: error.message }
+      console.error('Get options error:', error);
+      return { success: false, error: error.message };
     }
-  })
+  });
   
-  createMainWindow()
+  createMainWindow();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow()
+      createMainWindow();
     }
-  })
-})
+  });
+});
 
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
 
