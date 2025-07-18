@@ -3,6 +3,8 @@ const path = require('node:path');
 const PasswordGenerator = require('../shared/password-generator');
 const EncryptionManager = require('./encryption');
 const SimpleDatabaseManager = require('./simpleDatabaseManager');
+const AutoLockManager = require('./autoLockManager');
+const PasswordStorageManager = require('./passwordStorageManager');
 
 // Function to create main application window
 const createMainWindow = () => {
@@ -27,6 +29,8 @@ const passwordGenerator = new PasswordGenerator();
 // Initialize encryption and database managers
 const encryptionManager = new EncryptionManager();
 const databaseManager = new SimpleDatabaseManager();
+const autoLockManager = new AutoLockManager();
+let passwordStorageManager = null;
 
 // Handle app ready event
 app.whenReady().then(async () => {
@@ -144,6 +148,66 @@ app.whenReady().then(async () => {
       return { success: true, data: result };
     } catch (error) {
       console.error('Change master password error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  // Auto-lock handlers
+  ipcMain.handle('auto-lock-status', async () => {
+    try {
+      return { success: true, data: autoLockManager.getStatus() };
+    } catch (error) {
+      console.error('Auto-lock status error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('set-auto-lock-timeout', async (event, timeoutMinutes) => {
+    try {
+      autoLockManager.setLockTimeout(timeoutMinutes);
+      return { success: true, data: { timeoutMinutes } };
+    } catch (error) {
+      console.error('Set auto-lock timeout error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('set-auto-lock-enabled', async (event, enabled) => {
+    try {
+      autoLockManager.setEnabled(enabled);
+      return { success: true, data: { enabled } };
+    } catch (error) {
+      console.error('Set auto-lock enabled error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('force-lock', async () => {
+    try {
+      autoLockManager.forceLock();
+      return { success: true, data: { locked: true } };
+    } catch (error) {
+      console.error('Force lock error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('unlock-application', async (event, password) => {
+    try {
+      const result = await autoLockManager.unlockApplication(password);
+      return { success: true, data: { unlocked: result } };
+    } catch (error) {
+      console.error('Unlock application error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('register-activity', async () => {
+    try {
+      autoLockManager.registerActivity();
+      return { success: true };
+    } catch (error) {
+      console.error('Register activity error:', error);
       return { success: false, error: error.message };
     }
   });

@@ -218,17 +218,18 @@ All Phase 2 deliverables are complete and tested. The application now has:
   - Implement session management
   - **Deliverable:** Authentication system (Completed)
 
-- **TASK-MP-003**: Add password change functionality
-  - Design password change interface
-  - Implement re-encryption process
-  - Add backup mechanisms
-  - **Deliverable:** Password change system
+- **TASK-MP-003**: Add password change functionality (Completed - 2025-01-18)
+  - ✅ Designed password change interface with multi-step wizard
+  - ✅ Implemented secure re-encryption process
+  - ✅ Added verification and backup mechanisms
+  - **Deliverable:** Password change system ✅
 
-- **TASK-MP-004**: Create auto-lock mechanism
-  - Implement inactivity detection
-  - Add configurable timeout settings
-  - Create secure session cleanup
-  - **Deliverable:** Auto-lock functionality
+- **TASK-MP-004**: Create auto-lock mechanism (Completed - 2025-01-18)
+  - ✅ Implemented comprehensive inactivity detection
+  - ✅ Added configurable timeout settings (1-60 minutes)
+  - ✅ Created secure session cleanup with memory clearing
+  - ✅ Added force lock and unlock functionality
+  - **Deliverable:** Auto-lock functionality ✅
 
 ### 4.3 Password Storage
 **Duration:** 5 days  

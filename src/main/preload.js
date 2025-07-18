@@ -26,6 +26,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   authenticate: (username, password) => ipcRenderer.invoke('authenticate', username, password),
   changeMasterPassword: (oldPassword, newPassword) => ipcRenderer.invoke('change-master-password', oldPassword, newPassword),
   
+  // Auto-lock APIs
+  getAutoLockStatus: () => ipcRenderer.invoke('auto-lock-status'),
+  setAutoLockTimeout: (timeoutMinutes) => ipcRenderer.invoke('set-auto-lock-timeout', timeoutMinutes),
+  setAutoLockEnabled: (enabled) => ipcRenderer.invoke('set-auto-lock-enabled', enabled),
+  forceLock: () => ipcRenderer.invoke('force-lock'),
+  unlockApplication: (password) => ipcRenderer.invoke('unlock-application', password),
+  registerActivity: () => ipcRenderer.invoke('register-activity'),
+  
   // Password Management APIs (to be implemented)
   savePassword: (entry) => ipcRenderer.invoke('save-password', entry),
   getPasswords: () => ipcRenderer.invoke('get-passwords'),
