@@ -15,10 +15,12 @@ This document covers the application architecture, UI design, technical componen
 ## 2. Architectural Overview
 
 ### 2.1 Technology Stack
-- **Electron** for cross-platform desktop application.
-- **Node.js** for backend logic and processes.
-- **SQLite** for database storage.
-- **HTML/CSS/JavaScript** for front-end user interface.
+- **Electron** (latest stable) for cross-platform desktop application with modern security features
+- **Node.js** for backend logic and processes with secure memory handling
+- **better-sqlite3** for high-performance database storage with WAL mode
+- **HTML/CSS/JavaScript** for front-end user interface with Content Security Policy
+- **Argon2** for secure password hashing
+- **Node.js crypto module** for AES-256 encryption
 
 ### 2.2 Application Structure
 
@@ -44,16 +46,46 @@ src/
 ### 2.3 Modules and Components
 
 #### Main Process
-- **main.js**: Initialize and manage application lifecycle.
-- **database.js**: Handle all database-related operations.
-- **encryption.js**: Provide encryption services using AES-256.
-- **security.js**: Manage security policies and features.
+- **main.js**: Initialize and manage application lifecycle with secure window configuration
+- **database.js**: Handle all database-related operations with WAL mode and encryption
+- **encryption.js**: Provide encryption services using AES-256 and secure key management
+- **security.js**: Manage security policies, auto-lock, and breach detection
+- **preload.js**: Secure API exposure via contextBridge for renderer communication
 
 #### Renderer Process
-- **pages**: Defined for each main interface (e.g., Dashboard, Vault).
-- **components**: Reusable UI components for consistent design.
-- **utils**: Shared utility functions across the renderer.
-- **styles**: SCSS/CSS files for theming and styling.
+- **pages**: Defined for each main interface (e.g., Dashboard, Vault)
+- **components**: Reusable UI components for consistent design
+- **utils**: Shared utility functions across the renderer
+- **styles**: SCSS/CSS files for theming and styling
+
+### 2.4 Security Architecture
+
+#### Modern Electron Security Configuration
+```javascript
+// Secure BrowserWindow configuration
+const secureWindowConfig = {
+  webPreferences: {
+    contextIsolation: true,        // Enable context isolation
+    nodeIntegration: false,        // Disable node integration
+    enableRemoteModule: false,     // Disable remote module
+    sandbox: true,                 // Enable sandbox
+    preload: path.join(__dirname, 'preload.js')
+  }
+};
+```
+
+#### IPC Security Model
+- **contextBridge**: Secure API exposure between main and renderer processes
+- **ipcMain.handle/ipcRenderer.invoke**: Asynchronous, secure communication
+- **Input validation**: All IPC messages validated and sanitized
+- **Permission model**: Granular permissions for sensitive operations
+
+#### Content Security Policy
+```html
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; 
+               style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+```
 
 ## 3. Database Design
 

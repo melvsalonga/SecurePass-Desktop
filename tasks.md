@@ -75,11 +75,11 @@
 **Dependencies:** TASK-STRUCT-001  
 
 #### Tasks:
-- **TASK-DB-001**: Implement SQLite database connection
-  - Set up database initialization
-  - Configure connection pooling
+- **TASK-DB-001**: Implement better-sqlite3 database connection
+  - Set up database initialization with WAL mode
+  - Configure secure database options
   - Implement database locking mechanisms
-  - **Deliverable:** Secure database connection
+  - **Deliverable:** Secure database connection with better-sqlite3
 
 - **TASK-DB-002**: Create database schema
   - Implement users table

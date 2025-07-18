@@ -146,10 +146,12 @@ SecurePass Desktop is a comprehensive password management application that provi
 
 ### 4.1 Architecture Requirements
 - **REQ-ARCH-001**: Implement modular architecture with clear separation of concerns
-- **REQ-ARCH-002**: Use Electron framework for cross-platform compatibility
-- **REQ-ARCH-003**: Implement SQLite for local data storage
+- **REQ-ARCH-002**: Use Electron framework (latest stable) for cross-platform compatibility
+- **REQ-ARCH-003**: Implement better-sqlite3 for local data storage with WAL mode
 - **REQ-ARCH-004**: Use Node.js for backend processing
-- **REQ-ARCH-005**: Implement secure IPC communication between processes
+- **REQ-ARCH-005**: Implement secure IPC communication with contextBridge and contextIsolation
+- **REQ-ARCH-006**: Enable process sandboxing by default for all renderer processes
+- **REQ-ARCH-007**: Implement preload scripts for secure API exposure
 
 ### 4.2 Data Requirements
 - **REQ-DATA-001**: Support database encryption at rest

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SecurePass Desktop</title>
+  
+  <!-- Content Security Policy for enhanced security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="src/renderer/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>SecurePass Desktop</h1>
+      <div class="app-info">
+        <span id="version-info">Loading...</span>
+      </div>
+    </header>
+    
+    <main class="app-main">
+      <div class="welcome-container">
+        <h2>Welcome to SecurePass Desktop</h2>
+        <p>Your secure password management solution</p>
+        
+        <div class="status-section">
+          <div class="status-item">
+            <span class="status-label">Status:</span>
+            <span id="app-status" class="status-value">Initializing...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Versions:</span>
+            <div id="versions-info" class="versions-container">
+              <div>Node: <span id="node-version">-</span></div>
+              <div>Chrome: <span id="chrome-version">-</span></div>
+              <div>Electron: <span id="electron-version">-</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="actions-section">
+          <button id="test-connection" class="btn btn-primary">Test Connection</button>
+          <button id="get-started" class="btn btn-secondary">Get Started</button>
+        </div>
+        
+        <div class="result-section">
+          <div id="test-result" class="result-message"></div>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="app-footer">
+      <p>&copy; 2025 SecurePass Desktop. All rights reserved.</p>
+    </footer>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="src/renderer/js/main.js"></script>
+</body>
+</html>
