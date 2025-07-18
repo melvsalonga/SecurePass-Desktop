@@ -5,12 +5,11 @@
 
 class PasswordGeneratorUI {
   constructor() {
-    this.initializeEventListeners();
-    this.setupDefaults();
     this.currentPassword = '';
     this.currentPassphrase = '';
     this.passwordHistory = [];
     this.maxHistorySize = 50;
+    this.initializeEventListeners();
   }
 
   /**
@@ -44,7 +43,6 @@ class PasswordGeneratorUI {
     // Length slider updates
     document.getElementById('password-length').addEventListener('input', (e) => {
       document.getElementById('length-value').textContent = e.target.value;
-      this.showRegenerationSuggestion();
     });
 
     document.getElementById('word-count').addEventListener('input', (e) => {
@@ -55,15 +53,6 @@ class PasswordGeneratorUI {
       document.getElementById('batch-count-value').textContent = e.target.value;
     });
 
-    // Real-time strength analysis on password field
-    document.getElementById('generated-password').addEventListener('input', (e) => {
-      if (e.target.value) {
-        this.analyzePasswordStrength(e.target.value);
-      } else {
-        this.resetStrengthMeter();
-      }
-    });
-
     // Option changes trigger regeneration suggestions
     this.setupOptionChangeListeners();
 
@@ -72,6 +61,415 @@ class PasswordGeneratorUI {
       this.handleKeyboardShortcuts(e);
     });
   }
+
+  /**
+   * Setup listeners for option changes
+   */
+  setupOptionChangeListeners() {
+    const options = [
+      'include-uppercase', 'include-lowercase', 'include-numbers', 'include-symbols',
+      'exclude-ambiguous', 'enforce-complexity', 'password-length'
+    ];
+
+    options.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener('change', () => {
+          this.showRegenerationSuggestion();
+        });
+      }
+    });
+  }
+
+  /**
+   * Generate a new password
+   */
+  async generatePassword() {
+    try {
+      this.setGeneratingState(true);
+      
+      const options = this.getPasswordOptions();
+      const response = await window.electronAPI.generatePassword(options);
+      
+      if (response.success) {
+        this.currentPassword = response.data.password;
+        document.getElementById('generated-password').value = response.data.password;
+        this.updateStrengthMeter(response.data.strength, 'password');
+        this.updatePasswordDetails(response.data);
+        this.addToHistory(response.data.password, 'password');
+        this.showNotification('Password generated successfully!', 'success');
+      } else {
+        this.showNotification(response.error || 'Failed to generate password', 'error');
+      }
+    } catch (error) {
+      this.showNotification('Error generating password: ' + error.message, 'error');
+    } finally {
+      this.setGeneratingState(false);
+    }
+  }
+
+  /**
+   * Generate a passphrase
+   */
+  async generatePassphrase() {
+    try {
+      this.setGeneratingState(true, 'passphrase');
+      
+      const options = this.getPassphraseOptions();
+      const response = await window.electronAPI.generatePassphrase(options);
+      
+      if (response.success) {
+        this.currentPassphrase = response.data.passphrase;
+        document.getElementById('generated-passphrase').value = response.data.passphrase;
+        this.updateStrengthMeter(response.data.strength, 'passphrase');
+        this.addToHistory(response.data.passphrase, 'passphrase');
+        this.showNotification('Passphrase generated successfully!', 'success');
+      } else {
+        this.showNotification(response.error || 'Failed to generate passphrase', 'error');
+      }
+    } catch (error) {
+      this.showNotification('Error generating passphrase: ' + error.message, 'error');
+    } finally {
+      this.setGeneratingState(false, 'passphrase');
+    }
+  }
+
+  /**
+   * Generate batch passwords
+   */
+  async generateBatchPasswords() {
+    try {
+      this.setGeneratingState(true, 'batch');
+      
+      const count = parseInt(document.getElementById('batch-count').value) || 5;
+      const options = this.getPasswordOptions();
+      
+      const response = await window.electronAPI.generateBatch(count, options);
+      
+      if (response.success) {
+        this.displayBatchResults(response.data);
+        this.showNotification(`Generated ${response.data.length} passwords!`, 'success');
+      } else {
+        this.showNotification(response.error || 'Failed to generate batch passwords', 'error');
+      }
+    } catch (error) {
+      this.showNotification('Error generating batch passwords: ' + error.message, 'error');
+    } finally {
+      this.setGeneratingState(false, 'batch');
+    }
+  }
+
+  /**
+   * Display batch results
+   */
+  displayBatchResults(passwords) {
+    const container = document.getElementById('batch-results');
+    container.innerHTML = '';
+    
+    passwords.forEach((passwordData, index) => {
+      const item = document.createElement('div');
+      item.className = 'batch-item';
+      item.innerHTML = `
+        <div class="batch-password">
+          <input type="text" value="${passwordData.password}" readonly>
+          <button class="copy-btn" onclick="passwordGeneratorUI.copyBatchPassword('${passwordData.password}', ${index})">
+            📋
+          </button>
+        </div>
+        <div class="batch-strength">
+          <div class="strength-indicator ${passwordData.strength.level.toLowerCase().replace(' ', '-')}">
+            ${passwordData.strength.level}
+          </div>
+          <div class="strength-score">${passwordData.strength.score}/100</div>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  }
+
+  /**
+   * Copy a specific batch password
+   */
+  async copyBatchPassword(password, index) {
+    try {
+      await navigator.clipboard.writeText(password);
+      this.showNotification('Password copied to clipboard!', 'success');
+      
+      // Visual feedback
+      const buttons = document.querySelectorAll('.batch-item .copy-btn');
+      if (buttons[index]) {
+        const originalText = buttons[index].textContent;
+        buttons[index].textContent = '✓';
+        buttons[index].style.backgroundColor = '#2ecc71';
+        buttons[index].style.color = 'white';
+        
+        setTimeout(() => {
+          buttons[index].textContent = originalText;
+          buttons[index].style.backgroundColor = '';
+          buttons[index].style.color = '';
+        }, 1000);
+      }
+    } catch (error) {
+      this.showNotification('Failed to copy password', 'error');
+    }
+  }
+
+  /**
+   * Get password generation options
+   */
+  getPasswordOptions() {
+    return {
+      length: parseInt(document.getElementById('password-length').value),
+      includeLowercase: document.getElementById('include-lowercase').checked,
+      includeUppercase: document.getElementById('include-uppercase').checked,
+      includeNumbers: document.getElementById('include-numbers').checked,
+      includeSymbols: document.getElementById('include-symbols').checked,
+      excludeAmbiguous: document.getElementById('exclude-ambiguous').checked,
+      enforceComplexity: document.getElementById('enforce-complexity').checked
+    };
+  }
+
+  /**
+   * Get passphrase generation options
+   */
+  getPassphraseOptions() {
+    return {
+      wordCount: parseInt(document.getElementById('word-count').value),
+      separator: document.getElementById('word-separator').value,
+      capitalize: document.getElementById('capitalize-words').checked,
+      includeNumber: document.getElementById('include-number').checked,
+      includeSymbol: document.getElementById('include-symbol').checked
+    };
+  }
+
+  /**
+   * Update strength meter display
+   */
+  updateStrengthMeter(strength, type = 'password') {
+    const strengthFillId = type === 'password' ? 'strength-fill' : 'passphrase-strength-fill';
+    const strengthLevelId = type === 'password' ? 'strength-level' : 'passphrase-strength-level';
+    const strengthScoreId = type === 'password' ? 'strength-score' : 'passphrase-strength-score';
+    
+    const strengthFill = document.getElementById(strengthFillId);
+    const strengthLevel = document.getElementById(strengthLevelId);
+    const strengthScore = document.getElementById(strengthScoreId);
+    
+    if (strengthFill && strengthLevel && strengthScore) {
+      const percentage = (strength.score / 100) * 100;
+      strengthFill.style.width = `${percentage}%`;
+      strengthFill.className = `strength-fill ${strength.level.toLowerCase().replace(' ', '-')}`;
+      
+      strengthLevel.textContent = strength.level;
+      strengthScore.textContent = `${strength.score}/100`;
+    }
+  }
+
+  /**
+   * Update password details display
+   */
+  updatePasswordDetails(data) {
+    const detailsSection = document.getElementById('password-details');
+    if (detailsSection) {
+      detailsSection.style.display = 'block';
+      
+      document.getElementById('password-entropy').textContent = `${data.entropy.toFixed(1)} bits`;
+      document.getElementById('charset-size').textContent = data.charset;
+      document.getElementById('time-to-crack').textContent = data.strength.timeToCrack;
+      document.getElementById('generation-time').textContent = new Date(data.generated).toLocaleString();
+      
+      // Update security feedback
+      const feedbackContainer = document.getElementById('security-feedback');
+      feedbackContainer.innerHTML = '';
+      
+      if (data.strength.feedback && data.strength.feedback.length > 0) {
+        data.strength.feedback.forEach(feedback => {
+          const li = document.createElement('li');
+          li.textContent = feedback;
+          li.className = 'feedback-item';
+          feedbackContainer.appendChild(li);
+        });
+      } else {
+        const li = document.createElement('li');
+        li.textContent = 'No security issues detected';
+        li.className = 'feedback-item success';
+        feedbackContainer.appendChild(li);
+      }
+    }
+  }
+
+  /**
+   * Reset strength meter
+   */
+  resetStrengthMeter(type = 'password') {
+    const strengthFillId = type === 'password' ? 'strength-fill' : 'passphrase-strength-fill';
+    const strengthLevelId = type === 'password' ? 'strength-level' : 'passphrase-strength-level';
+    const strengthScoreId = type === 'password' ? 'strength-score' : 'passphrase-strength-score';
+    
+    const strengthFill = document.getElementById(strengthFillId);
+    const strengthLevel = document.getElementById(strengthLevelId);
+    const strengthScore = document.getElementById(strengthScoreId);
+    
+    if (strengthFill && strengthLevel && strengthScore) {
+      strengthFill.style.width = '0%';
+      strengthLevel.textContent = type === 'password' ? 'No password generated' : 'No passphrase generated';
+      strengthScore.textContent = '';
+    }
+  }
+
+  /**
+   * Copy to clipboard
+   */
+  async copyToClipboard(type) {
+    try {
+      const elementId = type === 'password' ? 'generated-password' : 'generated-passphrase';
+      const text = document.getElementById(elementId).value;
+      
+      if (!text) {
+        this.showNotification(`No ${type} to copy`, 'info');
+        return;
+      }
+      
+      await navigator.clipboard.writeText(text);
+      this.showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} copied to clipboard!`, 'success');
+      
+      // Visual feedback
+      const buttonId = type === 'password' ? 'copy-password' : 'copy-passphrase';
+      const button = document.getElementById(buttonId);
+      const originalText = button.textContent;
+      button.textContent = '✓';
+      button.style.backgroundColor = '#2ecc71';
+      button.style.color = 'white';
+      
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.style.backgroundColor = '';
+        button.style.color = '';
+      }, 1000);
+      
+    } catch (error) {
+      this.showNotification('Failed to copy to clipboard', 'error');
+    }
+  }
+
+  /**
+   * Set generating state
+   */
+  setGeneratingState(isGenerating, type = 'password') {
+    const buttonIds = {
+      password: 'generate-password',
+      passphrase: 'generate-passphrase',
+      batch: 'generate-batch'
+    };
+    
+    const buttonId = buttonIds[type];
+    const button = document.getElementById(buttonId);
+    
+    if (button) {
+      button.disabled = isGenerating;
+      if (isGenerating) {
+        button.textContent = 'Generating...';
+        button.classList.add('generating');
+      } else {
+        button.classList.remove('generating');
+        // Reset button text
+        if (type === 'password') button.textContent = 'Generate';
+        else if (type === 'passphrase') button.textContent = 'Generate';
+        else if (type === 'batch') button.textContent = 'Generate Batch';
+      }
+    }
+  }
+
+  /**
+   * Show regeneration suggestion
+   */
+  showRegenerationSuggestion() {
+    if (this.currentPassword) {
+      const generateBtn = document.getElementById('generate-password');
+      if (generateBtn) {
+        generateBtn.style.backgroundColor = '#f39c12';
+        generateBtn.title = 'Options changed - click to regenerate';
+      }
+    }
+  }
+
+  /**
+   * Add to history
+   */
+  addToHistory(password, type) {
+    this.passwordHistory.unshift({
+      password: password,
+      type: type,
+      timestamp: new Date().toISOString()
+    });
+    
+    if (this.passwordHistory.length > this.maxHistorySize) {
+      this.passwordHistory = this.passwordHistory.slice(0, this.maxHistorySize);
+    }
+  }
+
+  /**
+   * Handle keyboard shortcuts
+   */
+  handleKeyboardShortcuts(e) {
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case 'g':
+          e.preventDefault();
+          this.generatePassword();
+          break;
+        case 'c':
+          if (e.shiftKey) {
+            e.preventDefault();
+            this.copyToClipboard('password');
+          }
+          break;
+        case 'p':
+          if (e.shiftKey) {
+            e.preventDefault();
+            this.generatePassphrase();
+          }
+          break;
+        case 'b':
+          if (e.shiftKey) {
+            e.preventDefault();
+            this.generateBatchPasswords();
+          }
+          break;
+      }
+    }
+  }
+
+  /**
+   * Show notification
+   */
+  showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type} show`;
+    
+    // Remove notification after delay
+    setTimeout(() => {
+      notification.classList.remove('show');
+    }, 3000);
+  }
+}
+
+// Initialize the password generator UI when the page loads
+let passwordGeneratorUI;
+
+document.addEventListener('DOMContentLoaded', () => {
+  passwordGeneratorUI = new PasswordGeneratorUI();
+  
+  // Generate an initial password
+  passwordGeneratorUI.generatePassword();
+  
+  console.log('Password Generator UI initialized');
+});
+
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PasswordGeneratorUI;
+}
 
   /**
    * Setup default values
