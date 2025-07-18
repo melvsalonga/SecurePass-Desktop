@@ -212,6 +212,90 @@ app.whenReady().then(async () => {
     }
   });
   
+// Initialize password storage manager
+  passwordStorageManager = new PasswordStorageManager(databaseManager, encryptionManager);
+
+   // Password storage handlers
+  ipcMain.handle('add-password', async (event, entry) => {
+    try {
+      const result = await passwordStorageManager.addPassword(entry);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Add password error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('update-password', async (event, id, entry) => {
+    try {
+      const result = await passwordStorageManager.updatePassword(id, entry);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Update password error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('delete-password', async (event, id) => {
+    try {
+      const result = await passwordStorageManager.deletePassword(id);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Delete password error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-passwords', async () => {
+    try {
+      const result = await passwordStorageManager.getAllPasswords();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get passwords error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('search-passwords', async (event, query, filters) => {
+    try {
+      const result = await passwordStorageManager.searchPasswords(query, filters);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Search passwords error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('get-password-categories', async () => {
+    try {
+      const result = passwordStorageManager.getCategories();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get categories error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('add-password-category', async (event, category) => {
+    try {
+      passwordStorageManager.addCategory(category);
+      return { success: true, data: { category } };
+    } catch (error) {
+      console.error('Add category error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  ipcMain.handle('get-password-statistics', async () => {
+    try {
+      const result = await passwordStorageManager.getStatistics();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get statistics error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   createMainWindow();
 
   app.on('activate', () => {

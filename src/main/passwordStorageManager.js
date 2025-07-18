@@ -4,14 +4,14 @@
  */
 
 const crypto = require('node:crypto');
+const PasswordDatabase = require('./passwordDatabase');
 
 class PasswordStorageManager {
   constructor(databaseManager, encryptionManager) {
     this.databaseManager = databaseManager;
     this.encryptionManager = encryptionManager;
-    this.passwords = [];
-    this.categories = new Set(['General', 'Social Media', 'Banking', 'Work', 'Shopping', 'Email']);
-    this.loadPasswords();
+    this.passwordDatabase = null;
+    this.isInitialized = false;
   }
 
   /**
