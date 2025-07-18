@@ -241,10 +241,18 @@ describe('PasswordDatabase', () => {
       expect(categories).toContain('Custom Category');
     });
 
-    test('should not add empty category', () => {
+test('should not add empty category', () => {
       const beforeCount = passwordDatabase.getCategories().length;
       passwordDatabase.addCategory('');
       passwordDatabase.addCategory('   ');
+      const afterCount = passwordDatabase.getCategories().length;
+      expect(afterCount).toBe(beforeCount);
+    });
+
+    test('should handle duplicate categories', () => {
+      passwordDatabase.addCategory('Duplicate Category');
+      const beforeCount = passwordDatabase.getCategories().length;
+      passwordDatabase.addCategory('Duplicate Category');
       const afterCount = passwordDatabase.getCategories().length;
       expect(afterCount).toBe(beforeCount);
     });

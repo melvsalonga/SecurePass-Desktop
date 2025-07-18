@@ -303,6 +303,107 @@ app.whenReady().then(async () => {
     }
   });
 
+  // Enhanced categorization and tagging handlers
+  ipcMain.handle('get-all-tags', async () => {
+    try {
+      const result = await passwordStorageManager.getAllTags();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get all tags error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-tag-statistics', async () => {
+    try {
+      const result = await passwordStorageManager.getTagStatistics();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get tag statistics error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-entries-by-category', async (event, category) => {
+    try {
+      const result = await passwordStorageManager.getEntriesByCategory(category);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get entries by category error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-entries-by-tag', async (event, tag) => {
+    try {
+      const result = await passwordStorageManager.getEntriesByTag(tag);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get entries by tag error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-entries-by-tags', async (event, tags) => {
+    try {
+      const result = await passwordStorageManager.getEntriesByTags(tags);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get entries by tags error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('update-category-for-entries', async (event, oldCategory, newCategory) => {
+    try {
+      const result = await passwordStorageManager.updateCategoryForEntries(oldCategory, newCategory);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Update category for entries error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('replace-tag-for-entries', async (event, oldTag, newTag) => {
+    try {
+      const result = await passwordStorageManager.replaceTagForEntries(oldTag, newTag);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Replace tag for entries error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('remove-tag-from-entries', async (event, tagToRemove) => {
+    try {
+      const result = await passwordStorageManager.removeTagFromEntries(tagToRemove);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Remove tag from entries error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-category-statistics', async () => {
+    try {
+      const result = await passwordStorageManager.getCategoryStatistics();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get category statistics error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-organizational-insights', async () => {
+    try {
+      const result = await passwordStorageManager.getOrganizationalInsights();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get organizational insights error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   createMainWindow();
 
   app.on('activate', () => {

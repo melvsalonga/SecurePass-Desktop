@@ -212,15 +212,19 @@ class PasswordDatabase {
       const id = this.generateId();
       
       // Create entry with metadata
+      const passwordEntryDetails = {...entry};
+      passwordEntryDetails.category = this.validateAndAddCategory(passwordEntryDetails.category);
+      passwordEntryDetails.tags = (passwordEntryDetails.tags || []).map(tag => tag.trim()).filter(tag => tag !== '');
+      
       const passwordEntry = {
         id,
-        title: entry.title.trim(),
-        username: entry.username ? entry.username.trim() : '',
-        password: entry.password,
-        url: entry.url ? entry.url.trim() : '',
-        notes: entry.notes ? entry.notes.trim() : '',
-        category: entry.category || 'General',
-        tags: Array.isArray(entry.tags) ? entry.tags : [],
+        title: passwordEntryDetails.title.trim(),
+        username: passwordEntryDetails.username ? passwordEntryDetails.username.trim() : '',
+        password: passwordEntryDetails.password,
+        url: passwordEntryDetails.url ? passwordEntryDetails.url.trim() : '',
+        notes: passwordEntryDetails.notes ? passwordEntryDetails.notes.trim() : '',
+        category: passwordEntryDetails.category,
+        tags: passwordEntryDetails.tags,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         version: 1
@@ -250,6 +254,20 @@ class PasswordDatabase {
     } catch (error) {
       throw new Error(`Failed to add password entry: ${error.message}`);
     }
+  }
+
+  /**
+   * Validate and add category if new
+   * @param {string} category - Category name
+   * @returns {string} Validated category
+   */
+  validateAndAddCategory(category) {
+    category = category ? category.trim() : 'General';
+    if (!this.categories.has(category)) {
+      this.categories.add(category);
+      this.saveDatabase();
+    }
+    return category;
   }
 
   /**
@@ -392,7 +410,7 @@ class PasswordDatabase {
           entry.username.toLowerCase().includes(searchQuery) ||
           entry.url.toLowerCase().includes(searchQuery) ||
           entry.notes.toLowerCase().includes(searchQuery) ||
-          entry.tags.some(tag => tag.toLowerCase().includes(searchQuery))
+          (entry.tags || []).some(tag => tag.toLowerCase().includes(searchQuery))
         );
       }
       
@@ -583,6 +601,286 @@ class PasswordDatabase {
   removeCategory(category) {
     if (category !== 'General') { // Protect default category
       this.categories.delete(category);
+    }
+  }
+
+  /**
+   * Get all tags used in password entries
+   * @returns {Promise<Array>} Array of unique tags
+   */
+  async getAllTags() {
+    try {
+      const entries = await this.getAllEntries();
+      const tagsSet = new Set();
+      
+      entries.forEach(entry => {
+        (entry.tags || []).forEach(tag => {
+          if (tag && tag.trim()) {
+            tagsSet.add(tag.trim());
+          }
+        });
+      });
+      
+      return Array.from(tagsSet).sort();
+    } catch (error) {
+      throw new Error(`Failed to get tags: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get tag statistics with usage counts
+   * @returns {Promise<Object>} Object with tag names as keys and counts as values
+   */
+  async getTagStatistics() {
+    try {
+      const entries = await this.getAllEntries();
+      const tagCounts = {};
+      
+      entries.forEach(entry => {
+        (entry.tags || []).forEach(tag => {
+          if (tag && tag.trim()) {
+            const trimmedTag = tag.trim();
+            tagCounts[trimmedTag] = (tagCounts[trimmedTag] || 0) + 1;
+          }
+        });
+      });
+      
+      return tagCounts;
+    } catch (error) {
+      throw new Error(`Failed to get tag statistics: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries by category
+   * @param {string} category - Category name
+   * @returns {Promise<Array>} Array of entries in the specified category
+   */
+  async getEntriesByCategory(category) {
+    try {
+      const entries = await this.getAllEntries();
+      return entries.filter(entry => entry.category === category);
+    } catch (error) {
+      throw new Error(`Failed to get entries by category: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries by tag
+   * @param {string} tag - Tag name
+   * @returns {Promise<Array>} Array of entries with the specified tag
+   */
+  async getEntriesByTag(tag) {
+    try {
+      const entries = await this.getAllEntries();
+      return entries.filter(entry => entry.tags.includes(tag));
+    } catch (error) {
+      throw new Error(`Failed to get entries by tag: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries by multiple tags (AND operation)
+   * @param {Array} tags - Array of tag names
+   * @returns {Promise<Array>} Array of entries containing all specified tags
+   */
+  async getEntriesByTags(tags) {
+    try {
+      const entries = await this.getAllEntries();
+      return entries.filter(entry => 
+        tags.every(tag => entry.tags.includes(tag))
+      );
+    } catch (error) {
+      throw new Error(`Failed to get entries by tags: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update category for all entries matching a condition
+   * @param {string} oldCategory - Current category name
+   * @param {string} newCategory - New category name
+   * @returns {Promise<number>} Number of entries updated
+   */
+  async updateCategoryForEntries(oldCategory, newCategory) {
+    try {
+      const entries = await this.getAllEntries();
+      let updatedCount = 0;
+      
+      for (const entry of entries) {
+        if (entry.category === oldCategory) {
+          await this.updateEntry(entry.id, { category: newCategory });
+          updatedCount++;
+        }
+      }
+      
+      return updatedCount;
+    } catch (error) {
+      throw new Error(`Failed to update category for entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Replace tag across all entries
+   * @param {string} oldTag - Current tag name
+   * @param {string} newTag - New tag name
+   * @returns {Promise<number>} Number of entries updated
+   */
+  async replaceTagForEntries(oldTag, newTag) {
+    try {
+      const entries = await this.getAllEntries();
+      let updatedCount = 0;
+      
+      for (const entry of entries) {
+        if (entry.tags.includes(oldTag)) {
+          const updatedTags = entry.tags.map(tag => tag === oldTag ? newTag : tag);
+          await this.updateEntry(entry.id, { tags: updatedTags });
+          updatedCount++;
+        }
+      }
+      
+      return updatedCount;
+    } catch (error) {
+      throw new Error(`Failed to replace tag for entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Remove tag from all entries
+   * @param {string} tagToRemove - Tag name to remove
+   * @returns {Promise<number>} Number of entries updated
+   */
+  async removeTagFromEntries(tagToRemove) {
+    try {
+      const entries = await this.getAllEntries();
+      let updatedCount = 0;
+      
+      for (const entry of entries) {
+        if (entry.tags.includes(tagToRemove)) {
+          const updatedTags = entry.tags.filter(tag => tag !== tagToRemove);
+          await this.updateEntry(entry.id, { tags: updatedTags });
+          updatedCount++;
+        }
+      }
+      
+      return updatedCount;
+    } catch (error) {
+      throw new Error(`Failed to remove tag from entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get category usage statistics
+   * @returns {Promise<Object>} Object with detailed category statistics
+   */
+  async getCategoryStatistics() {
+    try {
+      const entries = await this.getAllEntries();
+      const categoryStats = {};
+      
+      // Initialize all categories with 0 count
+      for (const category of this.categories) {
+        categoryStats[category] = {
+          count: 0,
+          percentage: 0,
+          lastUsed: null,
+          averagePasswordAge: 0
+        };
+      }
+      
+      // Calculate statistics
+      entries.forEach(entry => {
+        if (categoryStats[entry.category]) {
+          categoryStats[entry.category].count++;
+          
+          const entryDate = new Date(entry.createdAt);
+          if (!categoryStats[entry.category].lastUsed || 
+              entryDate > new Date(categoryStats[entry.category].lastUsed)) {
+            categoryStats[entry.category].lastUsed = entry.createdAt;
+          }
+        }
+      });
+      
+      // Calculate percentages
+      const totalEntries = entries.length;
+      if (totalEntries > 0) {
+        Object.keys(categoryStats).forEach(category => {
+          categoryStats[category].percentage = 
+            Math.round((categoryStats[category].count / totalEntries) * 100);
+        });
+      }
+      
+      return categoryStats;
+    } catch (error) {
+      throw new Error(`Failed to get category statistics: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get organizational insights
+   * @returns {Promise<Object>} Object with organizational statistics and recommendations
+   */
+  async getOrganizationalInsights() {
+    try {
+      const entries = await this.getAllEntries();
+      const categoryStats = await this.getCategoryStatistics();
+      const tagStats = await this.getTagStatistics();
+      const allTags = await this.getAllTags();
+      
+      const insights = {
+        totalEntries: entries.length,
+        totalCategories: this.categories.size,
+        totalTags: allTags.length,
+        categoryDistribution: categoryStats,
+        tagDistribution: tagStats,
+        mostUsedCategory: null,
+        mostUsedTag: null,
+        untaggedEntries: 0,
+        recommendations: []
+      };
+      
+      // Find most used category
+      let maxCategoryCount = 0;
+      Object.keys(categoryStats).forEach(category => {
+        if (categoryStats[category].count > maxCategoryCount) {
+          maxCategoryCount = categoryStats[category].count;
+          insights.mostUsedCategory = category;
+        }
+      });
+      
+      // Find most used tag
+      let maxTagCount = 0;
+      Object.keys(tagStats).forEach(tag => {
+        if (tagStats[tag] > maxTagCount) {
+          maxTagCount = tagStats[tag];
+          insights.mostUsedTag = tag;
+        }
+      });
+      
+      // Count untagged entries
+      insights.untaggedEntries = entries.filter(entry => !entry.tags || entry.tags.length === 0).length;
+      
+      // Generate recommendations
+      if (insights.untaggedEntries > 0) {
+        insights.recommendations.push(
+          `Consider adding tags to ${insights.untaggedEntries} entries for better organization`
+        );
+      }
+      
+      if (insights.totalCategories > 10) {
+        insights.recommendations.push(
+          'You have many categories. Consider consolidating similar categories for better organization'
+        );
+      }
+      
+      if (insights.totalTags > 50) {
+        insights.recommendations.push(
+          'You have many tags. Consider reviewing and consolidating similar tags'
+        );
+      }
+      
+      return insights;
+    } catch (error) {
+      throw new Error(`Failed to get organizational insights: ${error.message}`);
     }
   }
 }

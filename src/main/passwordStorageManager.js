@@ -281,6 +281,144 @@ class PasswordStorageManager {
   generateId() {
     return crypto.randomBytes(16).toString('hex');
   }
+
+  /**
+   * Get all tags used in password entries
+   * @returns {Promise<Array>} Array of unique tags
+   */
+  async getAllTags() {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getAllTags();
+    } catch (error) {
+      throw new Error(`Failed to get all tags: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get tag statistics with usage counts
+   * @returns {Promise<Object>} Object with tag names as keys and counts as values
+   */
+  async getTagStatistics() {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getTagStatistics();
+    } catch (error) {
+      throw new Error(`Failed to get tag statistics: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries by category
+   * @param {string} category - Category name
+   * @returns {Promise<Array>} Array of entries in the specified category
+   */
+  async getEntriesByCategory(category) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getEntriesByCategory(category);
+    } catch (error) {
+      throw new Error(`Failed to get entries by category: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries by tag
+   * @param {string} tag - Tag name
+   * @returns {Promise<Array>} Array of entries with the specified tag
+   */
+  async getEntriesByTag(tag) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getEntriesByTag(tag);
+    } catch (error) {
+      throw new Error(`Failed to get entries by tag: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries by multiple tags (AND operation)
+   * @param {Array} tags - Array of tag names
+   * @returns {Promise<Array>} Array of entries containing all specified tags
+   */
+  async getEntriesByTags(tags) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getEntriesByTags(tags);
+    } catch (error) {
+      throw new Error(`Failed to get entries by tags: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update category for all entries matching a condition
+   * @param {string} oldCategory - Current category name
+   * @param {string} newCategory - New category name
+   * @returns {Promise<number>} Number of entries updated
+   */
+  async updateCategoryForEntries(oldCategory, newCategory) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.updateCategoryForEntries(oldCategory, newCategory);
+    } catch (error) {
+      throw new Error(`Failed to update category for entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Replace tag across all entries
+   * @param {string} oldTag - Current tag name
+   * @param {string} newTag - New tag name
+   * @returns {Promise<number>} Number of entries updated
+   */
+  async replaceTagForEntries(oldTag, newTag) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.replaceTagForEntries(oldTag, newTag);
+    } catch (error) {
+      throw new Error(`Failed to replace tag for entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Remove tag from all entries
+   * @param {string} tagToRemove - Tag name to remove
+   * @returns {Promise<number>} Number of entries updated
+   */
+  async removeTagFromEntries(tagToRemove) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.removeTagFromEntries(tagToRemove);
+    } catch (error) {
+      throw new Error(`Failed to remove tag from entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get category usage statistics
+   * @returns {Promise<Object>} Object with detailed category statistics
+   */
+  async getCategoryStatistics() {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getCategoryStatistics();
+    } catch (error) {
+      throw new Error(`Failed to get category statistics: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get organizational insights
+   * @returns {Promise<Object>} Object with organizational statistics and recommendations
+   */
+  async getOrganizationalInsights() {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getOrganizationalInsights();
+    } catch (error) {
+      throw new Error(`Failed to get organizational insights: ${error.message}`);
+    }
+  }
 }
 
 module.exports = PasswordStorageManager;
