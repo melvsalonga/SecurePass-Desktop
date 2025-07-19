@@ -14,7 +14,6 @@ class AutoLockManager {
     
     // Bind methods
     this.resetTimer = this.resetTimer.bind(this);
-    this.checkActivity = this.checkActivity.bind(this);
     
     this.initializeActivityTracking();
   }
