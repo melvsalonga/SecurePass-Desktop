@@ -460,7 +460,6 @@ class PasswordStorageManager {
     values.push(current);
     return values;
   }
-  }
 
   /**
    * Decrypt password entry
