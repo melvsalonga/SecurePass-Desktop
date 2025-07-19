@@ -16,7 +16,7 @@ describe('Password Import/Export', () => {
   let databaseManager;
   let testDbPath;
 
-  beforeEach(async () => {
+  beforeEach(async () => {
     // Create unique test database path and user
     const testId = Math.random().toString(36).substring(7);
     testDbPath = path.join(__dirname, `test-import-export-${testId}.db`);
@@ -32,7 +32,7 @@ describe('Password Import/Export', () => {
     
     // Create test user with unique username
     await databaseManager.createUser(testUsername, 'testpassword123');
-    const authResult = await databaseManager.authenticateUser(testUsername, 'testpassword123');
+    await databaseManager.authenticateUser(testUsername, 'testpassword123'); // Correct this
     
     // Initialize password storage manager
     passwordStorageManager = new PasswordStorageManager(databaseManager, encryptionManager);
@@ -151,13 +151,14 @@ describe('Password Import/Export', () => {
 
     test('should handle empty password vault export', async () => {
       // Create a fresh password storage manager with no passwords
-      const freshDbPath = path.join(__dirname, 'test-empty-export.db');
+      const emptyTestId = Math.random().toString(36).substring(7);
+      const freshDbPath = path.join(__dirname, `test-empty-export-${emptyTestId}.db`);
       const freshDatabaseManager = new SimpleDatabaseManager();
       freshDatabaseManager.databasePath = freshDbPath;
       
       await freshDatabaseManager.initialize();
-      await freshDatabaseManager.createUser('testuser', 'testpassword123');
-      await freshDatabaseManager.authenticateUser('testuser', 'testpassword123');
+      await freshDatabaseManager.createUser(`testuser_empty_${emptyTestId}`, 'testpassword123');
+      await freshDatabaseManager.authenticateUser(`testuser_empty_${emptyTestId}`, 'testpassword123');
       
       const freshPasswordManager = new PasswordStorageManager(freshDatabaseManager, encryptionManager);
       await freshPasswordManager.initialize(freshDatabaseManager.databaseKey);

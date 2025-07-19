@@ -264,7 +264,7 @@ class PasswordStorageManager {
               `"${(entry.url || '').replace(/"/g, '""')}"`,
               `"${(entry.notes || '').replace(/"/g, '""')}"`,
               `"${(entry.category || '').replace(/"/g, '""')}"`,
-              `"${(entry.tags || '').replace(/"/g, '""')}"`,
+              `"${(Array.isArray(entry.tags) ? entry.tags.join(', ') : entry.tags || '').toString().replace(/"/g, '""')}"`,
               entry.strength_score || 0,
               `"${entry.created_at || ''}"`,
               `"${entry.updated_at || ''}"`,
