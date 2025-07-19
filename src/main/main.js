@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const TrayManager = require('./trayManager');
 const path = require('node:path');
 const PasswordGenerator = require('../shared/password-generator');
 const EncryptionManager = require('./encryption');
@@ -162,7 +163,59 @@ app.whenReady().then(async () => {
     // Unregister all shortcuts
     globalShortcut.unregisterAll();
   });
-  await databaseManager.initialize();
+await databaseManager.initialize();
+
+  // Create main window first
+  createMainWindow();
+
+  // Initialize tray manager after main window is created
+  let trayManager = null;
+  if (TrayManager.isSupported()) {
+    trayManager = new TrayManager(mainWindow, passwordGenerator, autoLockManager);
+    
+    // Setup tray manager cleanup and window state synchronization
+    mainWindow.on('closed', () => {
+      if (trayManager) {
+        trayManager.destroy();
+        trayManager = null;
+      }
+    });
+    
+    // Update tray when window state changes
+    mainWindow.on('show', () => {
+      if (trayManager) {
+        trayManager.onWindowStateChange(true, false);
+      }
+    });
+    
+    mainWindow.on('hide', () => {
+      if (trayManager) {
+        trayManager.onWindowStateChange(false, false);
+      }
+    });
+    
+    mainWindow.on('minimize', () => {
+      if (trayManager) {
+        trayManager.onWindowStateChange(false, true);
+      }
+    });
+    
+    mainWindow.on('restore', () => {
+      if (trayManager) {
+        trayManager.onWindowStateChange(true, false);
+      }
+    });
+    
+    // Update tray authentication state when authentication changes
+    const updateTrayAuthState = (isAuthenticated) => {
+      if (trayManager) {
+        trayManager.updateAuthenticationState(isAuthenticated);
+      }
+    };
+    
+    // Store reference for authentication handlers
+    global.updateTrayAuthState = updateTrayAuthState;
+  }
 
   // Basic IPC handlers
   ipcMain.handle('ping', () => 'pong');
@@ -205,6 +258,11 @@ app.whenReady().then(async () => {
           username: username,
           loginTime: new Date().toISOString()
         };
+        
+        // Update tray authentication state
+        if (global.updateTrayAuthState) {
+          global.updateTrayAuthState(true);
+        }
       }
       
       return { success: true, data: result };
@@ -232,6 +290,11 @@ app.whenReady().then(async () => {
         username: null,
         loginTime: null
       };
+      
+      // Update tray authentication state
+      if (global.updateTrayAuthState) {
+        global.updateTrayAuthState(false);
+      }
       
       // Clear database key and password storage
       if (passwordStorageManager) {
@@ -642,11 +705,14 @@ app.whenReady().then(async () => {
     }
   });
 
-  createMainWindow();
-
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createMainWindow();
+      
+      // Reinitialize tray manager if needed
+      if (TrayManager.isSupported() && !trayManager) {
+        trayManager = new TrayManager(mainWindow, passwordGenerator, autoLockManager);
+      }
     }
   });
 });
