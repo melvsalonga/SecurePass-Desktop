@@ -1,10 +1,114 @@
+
 // SecurePass Desktop - Renderer Main JavaScript
 // This file handles the main UI logic and communicates with the main process
+
+  /**
+   * Register IPC event listeners
+   */
+  registerIPCListeners() {
+    if (!window.electronAPI) return;
+    
+    // Keyboard shortcut handlers
+    window.electronAPI.onShowShortcutsHelp(() => {
+      this.showKeyboardShortcutsHelp();
+    });
+
+    window.electronAPI.onNavigateTo(page => {
+      this.navigateToPage(page);
+    });
+
+    window.electronAPI.onQuickPasswordGenerated(password => {
+      this.handleQuickPasswordGenerated(password);
+    });
+
+    window.electronAPI.onForceLock(() => {
+      this.handleForceLock();
+    });
+  }
+
+  /**
+   * Setup keyboard shortcut handlers (local shortcuts)
+   */
+  setupKeyboardShortcutHandlers() {
+    // Add local keyboard shortcuts that work within the page
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key.toLowerCase()) {
+          case '/':
+            event.preventDefault();
+            this.showKeyboardShortcutsHelp();
+            break;
+          case 'f':
+            if (event.shiftKey) {
+              event.preventDefault();
+              this.focusSearchField();
+            }
+            break;
+        }
+      }
+    });
+  }
+
+  /**
+   * Show keyboard shortcuts help dialog
+   */
+  showKeyboardShortcutsHelp() {
+    const shortcuts = [
+      { key: 'Ctrl+G', action: 'Open Password Generator' },
+      { key: 'Ctrl+V', action: 'Open Password Vault' },
+      { key: 'Ctrl+D', action: 'Open Dashboard' },
+      { key: 'Ctrl+S', action: 'Open Settings' },
+      { key: 'Ctrl+L', action: 'Lock Application' },
+      { key: 'Ctrl+Shift+G', action: 'Generate Quick Password' },
+      { key: 'Ctrl+H', action: 'Show This Help' },
+      { key: 'Ctrl+Q', action: 'Quit Application' },
+      { key: 'F1', action: 'Show Application Help' },
+      { key: 'Ctrl+/', action: 'Show Shortcuts (Local)' },
+      { key: 'Ctrl+Shift+F', action: 'Focus Search Field (Local)' }
+    ];
+
+    const helpContent = shortcuts
+      .map(s => `${s.key.padEnd(15)} - ${s.action}`)
+      .join('\n');
+
+    const message = `Keyboard Shortcuts:\n\n${helpContent}\n\nNote: Global shortcuts work from anywhere, local shortcuts work within the application.`;
+    
+    // For now, use alert. In a production app, you'd want a proper modal
+    alert(message);
+  }
+
+  /**
+   * Handle quick password generated event
+   */
+  handleQuickPasswordGenerated(password) {
+    console.log('Quick password generated:', password);
+    this.showResult(`🔑 Quick password generated and copied to clipboard!`, 'success');
+  }
+
+  /**
+   * Handle force lock event
+   */
+  handleForceLock() {
+    console.log('Application locked via keyboard shortcut');
+    this.showResult('🔒 Application locked', 'info');
+  }
+
+  /**
+   * Focus search field if available
+   */
+  focusSearchField() {
+    const searchField = document.querySelector('input[type="search"], input[placeholder*="search"], input[placeholder*="Search"]');
+    if (searchField) {
+      searchField.focus();
+      searchField.select();
+    }
+  }
 
 class SecurePassRenderer {
   constructor() {
     this.isInitialized = false;
     this.themeManager = null;
+    this.shortcutsManager = null;
     this.init();
   }
 
@@ -54,6 +158,11 @@ class SecurePassRenderer {
       this.themeManager = new window.ThemeManager();
     }
     
+    // Initialize keyboard shortcuts manager
+    if (window.KeyboardShortcutsManager) {
+      this.shortcutsManager = new window.KeyboardShortcutsManager();
+    }
+    
     this.loadThemePreference();
     try {
       // Check if electronAPI is available
@@ -66,6 +175,11 @@ class SecurePassRenderer {
 
       // Setup event listeners
       this.setupEventListeners();
+
+      // Register IPC event listeners (if shortcuts manager wasn't initialized)
+      if (!this.shortcutsManager) {
+        this.registerIPCListeners();
+      }
 
       // Update status
       this.updateStatus('Ready', 'success');
@@ -124,6 +238,11 @@ class SecurePassRenderer {
 
     // Window events
     window.addEventListener('beforeunload', () => this.cleanup());
+    
+    // Setup keyboard shortcut handlers (if shortcuts manager not available)
+    if (!this.shortcutsManager) {
+      this.setupKeyboardShortcutHandlers();
+    }
   }
 
   /**

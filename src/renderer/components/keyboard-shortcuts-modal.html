@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Shortcuts</title>
+    <style>
+        .shortcuts-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .shortcuts-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .shortcuts-content {
+            background: var(--bg-primary, #ffffff);
+            color: var(--text-primary, #333333);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .shortcuts-modal.active .shortcuts-content {
+            transform: scale(1);
+        }
+
+        .shortcuts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color, #e1e1e1);
+        }
+
+        .shortcuts-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-primary, #333333);
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary, #666666);
+            transition: color 0.2s ease;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .close-button:hover {
+            color: var(--text-primary, #333333);
+            background: var(--bg-secondary, #f5f5f5);
+        }
+
+        .shortcuts-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-color, #0066cc);
+        }
+
+        .shortcuts-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--bg-secondary, #f8f9fa);
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #e1e1e1);
+        }
+
+        .shortcut-key {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-tertiary, #ffffff);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color, #cccccc);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary, #333333);
+        }
+
+        .shortcut-description {
+            flex: 1;
+            margin-left: 16px;
+            color: var(--text-secondary, #666666);
+        }
+
+        .shortcuts-note {
+            background: var(--info-bg, #e3f2fd);
+            color: var(--info-text, #1565c0);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            border-left: 4px solid var(--info-border, #2196f3);
+        }
+
+        /* Dark theme support */
+        [data-theme="dark"] .shortcuts-content {
+            background: var(--bg-primary, #1e1e1e);
+            color: var(--text-primary, #ffffff);
+        }
+
+        [data-theme="dark"] .shortcut-item {
+            background: var(--bg-secondary, #2a2a2a);
+            border-color: var(--border-color, #404040);
+        }
+
+        [data-theme="dark"] .shortcut-key {
+            background: var(--bg-tertiary, #333333);
+            border-color: var(--border-color, #555555);
+            color: var(--text-primary, #ffffff);
+        }
+    </style>
+</head>
+<body>
+    <div id="shortcuts-modal" class="shortcuts-modal">
+        <div class="shortcuts-content">
+            <div class="shortcuts-header">
+                <h2 class="shortcuts-title">⌨️ Keyboard Shortcuts</h2>
+                <button class="close-button" id="close-shortcuts" aria-label="Close shortcuts help">&times;</button>
+            </div>
+
+            <div class="shortcuts-section">
+                <h3 class="section-title">🌐 Global Shortcuts</h3>
+                <p style="margin-bottom: 12px; color: var(--text-secondary, #666); font-size: 14px;">
+                    These shortcuts work from anywhere while SecurePass is running:
+                </p>
+                <div class="shortcuts-list" id="global-shortcuts">
+                    <!-- Global shortcuts will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="shortcuts-section">
+                <h3 class="section-title">🏠 Application Shortcuts</h3>
+                <p style="margin-bottom: 12px; color: var(--text-secondary, #666); font-size: 14px;">
+                    These shortcuts work within the application:
+                </p>
+                <div class="shortcuts-list" id="local-shortcuts">
+                    <!-- Local shortcuts will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="shortcuts-note">
+                <strong>💡 Tips:</strong>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                    <li>Global shortcuts work even when SecurePass is minimized</li>
+                    <li>Use <kbd>Ctrl+H</kbd> or <kbd>Ctrl+/</kbd> to show this help anytime</li>
+                    <li>On Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class KeyboardShortcutsModal {
+            constructor() {
+                this.modal = document.getElementById('shortcuts-modal');
+                this.closeButton = document.getElementById('close-shortcuts');
+                this.globalShortcutsList = document.getElementById('global-shortcuts');
+                this.localShortcutsList = document.getElementById('local-shortcuts');
+                
+                this.setupEventListeners();
+                this.populateShortcuts();
+            }
+
+            setupEventListeners() {
+                // Close modal on close button click
+                this.closeButton.addEventListener('click', () => this.hide());
+                
+                // Close modal on escape key
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && this.modal.classList.contains('active')) {
+                        this.hide();
+                    }
+                });
+                
+                // Close modal when clicking outside content
+                this.modal.addEventListener('click', (event) => {
+                    if (event.target === this.modal) {
+                        this.hide();
+                    }
+                });
+            }
+
+            populateShortcuts() {
+                const globalShortcuts = [
+                    { key: 'Ctrl+G', description: 'Open Password Generator', icon: '🔐' },
+                    { key: 'Ctrl+V', description: 'Open Password Vault', icon: '🗂️' },
+                    { key: 'Ctrl+D', description: 'Open Dashboard', icon: '📊' },
+                    { key: 'Ctrl+S', description: 'Open Settings', icon: '⚙️' },
+                    { key: 'Ctrl+L', description: 'Lock Application', icon: '🔒' },
+                    { key: 'Ctrl+Shift+G', description: 'Generate Quick Password', icon: '⚡' },
+                    { key: 'Ctrl+H', description: 'Show This Help', icon: '❓' },
+                    { key: 'Ctrl+Q', description: 'Quit Application', icon: '🚪' },
+                    { key: 'F1', description: 'Show Application Help', icon: '📖' }
+                ];
+
+                const localShortcuts = [
+                    { key: 'Ctrl+/', description: 'Show Keyboard Shortcuts', icon: '⌨️' },
+                    { key: 'Ctrl+Shift+F', description: 'Focus Search Field', icon: '🔍' },
+                    { key: 'Escape', description: 'Close Modals/Dialogs', icon: '❌' },
+                    { key: 'Enter', description: 'Submit Forms', icon: '✅' },
+                    { key: 'Tab', description: 'Navigate Form Fields', icon: '🔄' }
+                ];
+
+                this.renderShortcuts(this.globalShortcutsList, globalShortcuts);
+                this.renderShortcuts(this.localShortcutsList, localShortcuts);
+            }
+
+            renderShortcuts(container, shortcuts) {
+                container.innerHTML = shortcuts.map(shortcut => `
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">${shortcut.key}</span>
+                        <span class="shortcut-description">
+                            ${shortcut.icon} ${shortcut.description}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            show() {
+                this.modal.classList.add('active');
+                // Focus the close button for accessibility
+                setTimeout(() => this.closeButton.focus(), 100);
+            }
+
+            hide() {
+                this.modal.classList.remove('active');
+            }
+
+            toggle() {
+                if (this.modal.classList.contains('active')) {
+                    this.hide();
+                } else {
+                    this.show();
+                }
+            }
+        }
+
+        // Initialize the modal
+        const shortcutsModal = new KeyboardShortcutsModal();
+        
+        // Make it available globally
+        window.KeyboardShortcutsModal = shortcutsModal;
+    </script>
+</body>
+</html>
