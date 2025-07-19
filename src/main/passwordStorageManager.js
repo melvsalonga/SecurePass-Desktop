@@ -59,7 +59,25 @@ class PasswordStorageManager {
   async addPassword(entry) {
     try {
       this.ensureReady();
-      return await this.passwordDatabase.addEntry(entry);
+      
+      // Process entry to ensure tags are in array format
+      const processedEntry = { ...entry };
+      
+      // Convert string tags to array format
+      if (processedEntry.tags) {
+        if (typeof processedEntry.tags === 'string') {
+          processedEntry.tags = processedEntry.tags
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag !== '');
+        } else if (!Array.isArray(processedEntry.tags)) {
+          processedEntry.tags = [];
+        }
+      } else {
+        processedEntry.tags = [];
+      }
+      
+      return await this.passwordDatabase.addEntry(processedEntry);
     } catch (error) {
       throw new Error(`Failed to add password: ${error.message}`);
     }

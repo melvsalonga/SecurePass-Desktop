@@ -17,9 +17,10 @@ describe('Password Import/Export', () => {
   let testDbPath;
 
   beforeEach(async () => {
-    // Create unique test database path
+    // Create unique test database path and user
     const testId = Math.random().toString(36).substring(7);
     testDbPath = path.join(__dirname, `test-import-export-${testId}.db`);
+    const testUsername = `testuser_${testId}`;
     
     // Initialize managers
     encryptionManager = new EncryptionManager();
@@ -29,9 +30,9 @@ describe('Password Import/Export', () => {
     // Initialize database
     await databaseManager.initialize();
     
-    // Create test user
-    await databaseManager.createUser('testuser', 'testpassword123');
-    const authResult = await databaseManager.authenticateUser('testuser', 'testpassword123');
+    // Create test user with unique username
+    await databaseManager.createUser(testUsername, 'testpassword123');
+    const authResult = await databaseManager.authenticateUser(testUsername, 'testpassword123');
     
     // Initialize password storage manager
     passwordStorageManager = new PasswordStorageManager(databaseManager, encryptionManager);
@@ -58,7 +59,7 @@ describe('Password Import/Export', () => {
           url: 'https://gmail.com',
           notes: 'Personal email account',
           category: 'Email',
-          tags: 'personal, email'
+          tags: ['personal', 'email']
         },
         {
           title: 'Bank Login',
@@ -67,7 +68,7 @@ describe('Password Import/Export', () => {
           url: 'https://mybank.com',
           notes: 'Main bank account',
           category: 'Banking',
-          tags: 'financial, important'
+          tags: ['financial', 'important']
         },
         {
           title: 'Work Portal',
@@ -76,7 +77,7 @@ describe('Password Import/Export', () => {
           url: 'https://company.com/login',
           notes: 'Work system access',
           category: 'Work',
-          tags: 'work, professional'
+          tags: ['work', 'professional']
         }
       ];
 
@@ -434,7 +435,7 @@ describe('Password Import/Export', () => {
           url: 'https://test1.com',
           notes: 'Round trip test notes',
           category: 'Test',
-          tags: 'test, roundtrip'
+          tags: ['test', 'roundtrip']
         },
         {
           title: 'Round Trip Test 2',
@@ -443,7 +444,7 @@ describe('Password Import/Export', () => {
           url: 'https://test2.com',
           notes: 'Another test entry',
           category: 'Test',
-          tags: 'test, verification'
+          tags: ['test', 'verification']
         }
       ];
 
