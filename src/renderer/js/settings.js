@@ -101,6 +101,19 @@ class SettingsUI {
       this.applyTheme(e.target.value);
     });
     
+    // Password import/export functionality
+    document.getElementById('export-passwords').addEventListener('click', async () => {
+      await this.exportPasswords();
+    });
+    
+    document.getElementById('import-passwords').addEventListener('click', () => {
+      document.getElementById('import-file').click();
+    });
+    
+    document.getElementById('import-file').addEventListener('change', async (e) => {
+      await this.importPasswords(e.target.files[0]);
+    });
+    
     // Navigation
     document.getElementById('back-home').addEventListener('click', () => {
       window.location.href = '../../index.html';
