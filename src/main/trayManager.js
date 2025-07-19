@@ -497,7 +497,15 @@ class TrayManager {
      * Check if tray is supported on current platform
      */
     static isSupported() {
-        return Tray.isSupported();
+        try {
+            // Try to create a temporary tray to check support
+            const tempTray = new Tray(nativeImage.createEmpty());
+            tempTray.destroy();
+            return true;
+        } catch (error) {
+            console.warn('System tray not supported on this platform:', error.message);
+            return false;
+        }
     }
 
     /**
