@@ -211,6 +211,68 @@
           </div>
         </section>
         
+        <!-- Password Import/Export -->
+        <section class="settings-section">
+          <h2>Password Import/Export</h2>
+          
+          <div class="setting-group">
+            <h3>Export Passwords</h3>
+            <p>Export your password vault to backup or transfer to another application.</p>
+            
+            <div class="export-options">
+              <label>
+                <input type="radio" name="export-format" value="json" checked>
+                JSON (SecurePass format)
+              </label>
+              <label>
+                <input type="radio" name="export-format" value="csv">
+                CSV (Universal format)
+              </label>
+              <label>
+                <input type="radio" name="export-format" value="xml">
+                XML (Structured format)
+              </label>
+            </div>
+            
+            <div class="export-security">
+              <label>
+                <input type="checkbox" id="include-passwords" checked>
+                Include passwords in export (uncheck for metadata only)
+              </label>
+            </div>
+            
+            <button id="export-passwords" class="btn btn-secondary">Export Passwords</button>
+          </div>
+          
+          <div class="setting-group">
+            <h3>Import Passwords</h3>
+            <p>Import passwords from another password manager or backup file.</p>
+            
+            <div class="import-options">
+              <label>
+                <input type="checkbox" id="check-duplicates" checked>
+                Check for duplicate entries
+              </label>
+              <label>
+                <input type="checkbox" id="skip-duplicates">
+                Skip duplicates (otherwise update existing)
+              </label>
+            </div>
+            
+            <button id="import-passwords" class="btn btn-secondary">Import Passwords</button>
+            <input type="file" id="import-file" accept=".json,.csv" style="display: none;">
+          </div>
+          
+          <div class="import-help">
+            <h4>Supported Formats:</h4>
+            <ul>
+              <li><strong>JSON:</strong> SecurePass native format or generic JSON</li>
+              <li><strong>CSV:</strong> Common format with columns: Title, Username, Password, URL, Notes, Category</li>
+            </ul>
+            <p><em>Note: Always backup your existing vault before importing!</em></p>
+          </div>
+        </section>
+        
         <!-- Action Buttons -->
         <section class="settings-actions">
           <button id="save-settings" class="btn btn-primary">Save Settings</button>
