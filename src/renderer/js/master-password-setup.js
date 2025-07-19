@@ -389,7 +389,7 @@ class MasterPasswordSetup {
    */
   startUsingApp() {
     // Navigate to the main application
-    window.location.href = '../../index.html';
+    window.location.href = 'dashboard.html';
   }
 
   /**

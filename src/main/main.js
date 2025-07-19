@@ -32,6 +32,13 @@ const databaseManager = new SimpleDatabaseManager();
 const autoLockManager = new AutoLockManager();
 let passwordStorageManager = null;
 
+// Session management
+let currentSession = {
+  isAuthenticated: false,
+  username: null,
+  loginTime: null
+};
+
 // Handle app ready event
 app.whenReady().then(async () => {
   await databaseManager.initialize();
@@ -70,11 +77,49 @@ app.whenReady().then(async () => {
       if (result.authenticated && databaseManager.databaseKey) {
         await passwordStorageManager.initialize(databaseManager.databaseKey);
         console.log('Password storage initialized after successful authentication');
+        
+        // Update session state
+        currentSession = {
+          isAuthenticated: true,
+          username: username,
+          loginTime: new Date().toISOString()
+        };
       }
       
       return { success: true, data: result };
     } catch (error) {
       console.error('Authentication error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Session management handlers
+  ipcMain.handle('get-session-status', async () => {
+    try {
+      return { success: true, data: currentSession };
+    } catch (error) {
+      console.error('Get session status error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('logout', async () => {
+    try {
+      // Clear session state
+      currentSession = {
+        isAuthenticated: false,
+        username: null,
+        loginTime: null
+      };
+      
+      // Clear database key and password storage
+      if (passwordStorageManager) {
+        passwordStorageManager.clearCache();
+      }
+      
+      return { success: true, data: { loggedOut: true } };
+    } catch (error) {
+      console.error('Logout error:', error);
       return { success: false, error: error.message };
     }
   });

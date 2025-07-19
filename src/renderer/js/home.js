@@ -25,10 +25,20 @@ class HomePageController {
         const hasPassword = await window.electronAPI.hasMasterPassword();
         
         if (hasPassword.success && hasPassword.data) {
-          // Master password exists, show authentication required
-          this.isAuthenticated = false;
-          this.updateUIBasedOnAuth();
-          this.loadApplicationStatus();
+          // Master password exists, check if user is already authenticated
+          const sessionStatus = await window.electronAPI.getSessionStatus();
+          if (sessionStatus.success && sessionStatus.data.isAuthenticated) {
+            // User is already authenticated
+            this.isAuthenticated = true;
+            this.currentUser = { username: sessionStatus.data.username };
+            this.updateUIBasedOnAuth();
+            this.loadApplicationStatus();
+          } else {
+            // Master password exists but not authenticated, show login
+            this.isAuthenticated = false;
+            this.updateUIBasedOnAuth();
+            this.loadApplicationStatus();
+          }
         } else {
           // No master password, redirect to setup
           this.showSetupPrompt();
@@ -177,11 +187,29 @@ class HomePageController {
   /**
    * Logout user
    */
-  logout() {
-    this.isAuthenticated = false;
-    this.currentUser = null;
-    this.updateUIBasedOnAuth();
-    this.showResult('Logged out successfully', 'info');
+  async logout() {
+    try {
+      if (window.electronAPI) {
+        const response = await window.electronAPI.logout();
+        if (response.success) {
+          this.isAuthenticated = false;
+          this.currentUser = null;
+          this.updateUIBasedOnAuth();
+          this.showResult('Logged out successfully', 'info');
+        } else {
+          this.showResult('Logout failed: ' + response.error, 'error');
+        }
+      } else {
+        // Demo mode
+        this.isAuthenticated = false;
+        this.currentUser = null;
+        this.updateUIBasedOnAuth();
+        this.showResult('Logged out successfully', 'info');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+      this.showResult('Logout failed: ' + error.message, 'error');
+    }
   }
 
   /**

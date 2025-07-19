@@ -694,7 +694,7 @@ class PasswordGeneratorUI {
     const backButton = document.getElementById('back-home');
     if (backButton) {
       backButton.addEventListener('click', () => {
-        window.location.href = '../../index.html';
+        window.location.href = 'home.html';
       });
     }
   }
