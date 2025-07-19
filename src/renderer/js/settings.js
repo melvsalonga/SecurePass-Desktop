@@ -273,6 +273,113 @@ class SettingsUI {
   }
   
   /**
+   * Export passwords to file
+   */
+  async exportPasswords() {
+    try {
+      // Get selected format
+      const formatRadios = document.querySelectorAll('input[name="export-format"]');
+      let format = 'json';
+      for (const radio of formatRadios) {
+        if (radio.checked) {
+          format = radio.value;
+          break;
+        }
+      }
+      
+      // Get export options
+      const includePasswords = document.getElementById('include-passwords').checked;
+      const options = { includePasswords };
+      
+      // Export passwords
+      const result = await window.electronAPI.exportPasswords(format, options);
+      
+      if (result.success) {
+        // Create download
+        const blob = new Blob([result.data], { 
+          type: format === 'json' ? 'application/json' : 
+                format === 'csv' ? 'text/csv' : 
+                'application/xml'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        
+        a.href = url;
+        a.download = `securepass-passwords-${timestamp}.${format}`;
+        a.click();
+        
+        URL.revokeObjectURL(url);
+        this.showNotification(`Passwords exported successfully as ${format.toUpperCase()}!`, 'success');
+      } else {
+        throw new Error(result.error || 'Export failed');
+      }
+    } catch (error) {
+      console.error('Password export error:', error);
+      this.showNotification(`Failed to export passwords: ${error.message}`, 'error');
+    }
+  }
+  
+  /**
+   * Import passwords from file
+   */
+  async importPasswords(file) {
+    if (!file) return;
+    
+    try {
+      // Determine format from file extension
+      const format = file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
+      
+      // Get import options
+      const checkDuplicates = document.getElementById('check-duplicates').checked;
+      const skipDuplicates = document.getElementById('skip-duplicates').checked;
+      const options = { checkDuplicates, skipDuplicates };
+      
+      // Read file content
+      const data = await this.readFileAsText(file);
+      
+      // Import passwords
+      const result = await window.electronAPI.importPasswords(data, format, options);
+      
+      if (result.success) {
+        const { imported, skipped, duplicates, errors } = result.data;
+        let message = `Import completed: ${imported} imported`;
+        
+        if (skipped > 0) message += `, ${skipped} skipped`;
+        if (duplicates > 0) message += `, ${duplicates} duplicates found`;
+        if (errors.length > 0) message += `, ${errors.length} errors`;
+        
+        this.showNotification(message, 'success');
+        
+        // Show detailed results if there are errors
+        if (errors.length > 0) {
+          console.warn('Import errors:', errors);
+        }
+      } else {
+        throw new Error(result.error || 'Import failed');
+      }
+    } catch (error) {
+      console.error('Password import error:', error);
+      this.showNotification(`Failed to import passwords: ${error.message}`, 'error');
+    } finally {
+      // Clear the file input
+      document.getElementById('import-file').value = '';
+    }
+  }
+  
+  /**
+   * Read file as text
+   */
+  readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsText(file);
+    });
+  }
+  
+  /**
    * Show notification
    */
   showNotification(message, type = 'info') {
