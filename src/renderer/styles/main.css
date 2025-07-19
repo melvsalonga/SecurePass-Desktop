@@ -53,8 +53,11 @@ body {
 
 /* For generator and other full-width pages */
 .app-main.full-width {
-  display: block;
-  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 140px);
 }
 
 /* For centered content pages */
@@ -71,8 +74,29 @@ body {
   border-radius: var(--radius-xl);
   box-shadow: 0 20px 40px var(--shadow-light);
   max-width: 600px;
-  width: 100%;
+  width: 90%;
   text-align: center;
+  margin: 0 auto;
+}
+
+/* For full-width pages, make welcome container use more space and center properly */
+.app-main.full-width .welcome-container {
+  max-width: 800px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* Responsive adjustments for larger screens */
+@media (min-width: 1024px) {
+  .app-main.full-width .welcome-container {
+    max-width: 900px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .app-main.full-width .welcome-container {
+    max-width: 1000px;
+  }
 }
 
 /* Full width container for generator-like pages */

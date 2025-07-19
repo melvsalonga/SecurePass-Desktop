@@ -187,6 +187,49 @@
   }
 }
 
+/* Responsive Enhancements */
+@media (max-width: 480px) {
+  .settings-container {
+    padding: 10px;
+  }
+  
+  .settings-section {
+    padding: 15px;
+  }
+  
+  .settings-actions .btn {
+    width: 100%;
+  }
+  
+  .setting-group {
+    flex-direction: column;
+  }
+  
+  .setting-group label {
+    margin-bottom: 5px;
+  }
+}
+
+/* Additional Responsive Styles */
+@media (max-width: 1024px) {
+  .settings-container {
+    max-width: 90%;
+  }
+
+  .settings-section {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .input-with-slider {
+    flex-direction: column;
+  }
+  
+  .settings-actions {
+    justify-content: space-between;
+  }
+}
+
 /* Dark Theme Support */
 [data-theme="dark"] .settings-section {
   background: #2c3e50;

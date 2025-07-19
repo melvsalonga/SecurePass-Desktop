@@ -3,29 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Vault</title>
+    <title>Password Vault - SecurePass Desktop</title>
+    
+    <!-- Content Security Policy for enhanced security -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="../styles/themes.css">
     <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/vault.css">
 </head>
 <body>
-    <header class="vault-header">
-        <h1>Password Vault</h1>
-        <button id="import-passwords">Import Passwords</button>
-        <button id="export-passwords">Export Passwords</button>
-        <div id="notification" class="notification"></div>
-    </header>
-    
-    <main class="vault-main">
-        <div id="vault-entries" class="vault-entries">
-            <!-- Password entries will be listed here -->
-        </div>
-    </main>
+    <div id="app">
+        <header class="app-header">
+            <h1>🗂️ Password Vault</h1>
+            <div class="app-info">
+                <nav class="app-nav">
+                    <button id="back-home" class="btn btn-secondary">← Back to Home</button>
+                </nav>
+            </div>
+        </header>
+        
+        <main class="app-main full-width">
+            <div class="vault-container">
+                <!-- Vault Controls -->
+                <section class="vault-controls">
+                    <div class="search-section">
+                        <div class="search-field">
+                            <input type="search" id="search-passwords" placeholder="Search passwords..." class="search-input">
+                            <button id="clear-search" class="btn btn-icon" title="Clear search">✕</button>
+                        </div>
+                        <div class="filter-section">
+                            <select id="category-filter" class="filter-select">
+                                <option value="">All Categories</option>
+                            </select>
+                            <select id="sort-options" class="filter-select">
+                                <option value="title-asc">Title (A-Z)</option>
+                                <option value="title-desc">Title (Z-A)</option>
+                                <option value="date-desc">Recently Added</option>
+                                <option value="date-asc">Oldest First</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="add-password" class="btn btn-primary">+ Add Password</button>
+                        <button id="import-passwords" class="btn btn-secondary">📥 Import</button>
+                        <button id="export-passwords" class="btn btn-secondary">📤 Export</button>
+                    </div>
+                </section>
 
-    <footer class="vault-footer">
-        &copy; 2025 SecurePass Desktop. All rights reserved.
-    </footer>
+                <!-- Vault Entries -->
+                <section class="vault-entries-section">
+                    <div class="vault-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="total-entries">0</span>
+                            <span class="stat-label">Total Passwords</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="categories-count">0</span>
+                            <span class="stat-label">Categories</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="weak-passwords">0</span>
+                            <span class="stat-label">Weak Passwords</span>
+                        </div>
+                    </div>
+                    
+                    <div id="vault-entries" class="vault-entries">
+                        <!-- Password entries will be listed here -->
+                    </div>
+                    
+                    <div id="empty-state" class="empty-state" style="display: none;">
+                        <div class="empty-icon">🔐</div>
+                        <h3>No passwords yet</h3>
+                        <p>Add your first password to get started with SecurePass</p>
+                        <button id="add-first-password" class="btn btn-primary">Add Your First Password</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <footer class="app-footer">
+            <p>&copy; 2025 SecurePass Desktop. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Password Entry Modal -->
+    <div id="password-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Password</h3>
+                <button id="close-modal" class="btn btn-icon">✕</button>
+            </div>
+            <form id="password-form" class="modal-form">
+                <div class="form-group">
+                    <label for="entry-title">Title:</label>
+                    <input type="text" id="entry-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="entry-username">Username/Email:</label>
+                    <input type="text" id="entry-username">
+                </div>
+                <div class="form-group">
+                    <label for="entry-password">Password:</label>
+                    <div class="password-input-group">
+                        <input type="password" id="entry-password" required>
+                        <button type="button" id="toggle-password" class="btn btn-icon">👁️</button>
+                        <button type="button" id="generate-new-password" class="btn btn-secondary">Generate</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="entry-url">Website URL:</label>
+                    <input type="url" id="entry-url">
+                </div>
+                <div class="form-group">
+                    <label for="entry-category">Category:</label>
+                    <input type="text" id="entry-category" placeholder="e.g., Work, Personal, Banking">
+                </div>
+                <div class="form-group">
+                    <label for="entry-tags">Tags (comma-separated):</label>
+                    <input type="text" id="entry-tags" placeholder="e.g., work, important, 2fa">
+                </div>
+                <div class="form-group">
+                    <label for="entry-notes">Notes:</label>
+                    <textarea id="entry-notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-entry" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification area -->
+    <div id="notification" class="notification"></div>
 
     <script src="../js/theme-manager.js"></script>
+    <script src="../js/keyboard-shortcuts-manager.js"></script>
     <script src="../js/vault.js"></script>
 </body>
 </html>

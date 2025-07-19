@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3000);
   }
 
+  // Back to Home navigation
+  const backHomeBtn = document.getElementById('back-home');
+  if (backHomeBtn) {
+    backHomeBtn.addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+  }
+
   // Import passwords
   document.getElementById('import-passwords').addEventListener('click', async () => {
     const input = document.createElement('input');
