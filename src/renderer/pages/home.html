@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SecurePass Desktop - Home</title>
+  
+  <!-- Content Security Policy for enhanced security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../styles/themes.css">
+  <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>SecurePass Desktop</h1>
+      <div class="app-info">
+        <span id="version-info">Loading...</span>
+      </div>
+    </header>
+    
+    <main class="app-main">
+      <!-- Authentication Required Section (shown when not logged in) -->
+      <div id="auth-required" class="welcome-container" style="display: none;">
+        <h2>Authentication Required</h2>
+        <p>Please sign in to access SecurePass Desktop</p>
+        
+        <div class="status-section">
+          <div class="status-item">
+            <span class="status-label">Status:</span>
+            <span id="auth-status" class="status-value">Not Authenticated</span>
+          </div>
+        </div>
+        
+        <div class="auth-actions">
+          <button id="show-login" class="btn btn-primary">🔑 Sign In</button>
+          <button id="show-setup" class="btn btn-secondary">🆕 Set Up Master Password</button>
+        </div>
+        
+        <!-- Inline Login Form -->
+        <div id="login-form" class="auth-form" style="display: none;">
+          <h3>Sign In</h3>
+          <form id="auth-form">
+            <div class="form-group">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Master Password:</label>
+              <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Sign In</button>
+              <button type="button" id="cancel-login" class="btn btn-secondary">Cancel</button>
+            </div>
+          </form>
+          
+          <div id="auth-result" class="result-message"></div>
+        </div>
+        
+        <div class="result-section">
+          <div id="auth-message" class="result-message"></div>
+        </div>
+      </div>
+      
+      <!-- Main Dashboard (shown when authenticated) -->
+      <div id="main-dashboard" class="welcome-container" style="display: none;">
+        <h2>Welcome to SecurePass Desktop</h2>
+        <p>Your secure password management solution</p>
+        
+        <div class="status-section">
+          <div class="status-item">
+            <span class="status-label">Status:</span>
+            <span id="app-status" class="status-value">Ready</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Database:</span>
+            <span id="db-status" class="status-value">Connected</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Security:</span>
+            <span id="security-status" class="status-value">Active</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">User:</span>
+            <span id="current-user" class="status-value">-</span>
+          </div>
+        </div>
+        
+        <div class="actions-section">
+          <button id="password-generator" class="btn btn-primary">🔐 Password Generator</button>
+          <button id="password-vault" class="btn btn-secondary">🗃️ Password Vault</button>
+          <button id="app-settings" class="btn btn-secondary">⚙️ Settings</button>
+        </div>
+        
+        <div class="quick-actions">
+          <h3>Quick Actions</h3>
+          <div class="quick-grid">
+            <button id="generate-quick" class="btn btn-outline">Generate Password</button>
+            <button id="check-strength" class="btn btn-outline">Check Strength</button>
+            <button id="import-passwords" class="btn btn-outline">Import Data</button>
+            <button id="backup-data" class="btn btn-outline">Backup Data</button>
+          </div>
+        </div>
+        
+        <div class="user-actions">
+          <button id="logout" class="btn btn-outline">🚪 Sign Out</button>
+        </div>
+        
+        <div class="result-section">
+          <div id="result-message" class="result-message"></div>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="app-footer">
+      <p>&copy; 2025 SecurePass Desktop. All rights reserved.</p>
+    </footer>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="../js/theme-manager.js"></script>
+  <script src="../js/home.js"></script>
+</body>
+</html>

@@ -20,7 +20,7 @@ const createMainWindow = () => {
     }
   });
 
-  win.loadFile(path.resolve(__dirname, '../../index.html'));
+  win.loadFile(path.resolve(__dirname, '../renderer/pages/home.html'));
 };
 
 // Initialize password generator

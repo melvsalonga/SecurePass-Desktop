@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - SecurePass Desktop</title>
+  
+  <!-- Content Security Policy for enhanced security -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../styles/themes.css">
+  <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1>SecurePass Desktop</h1>
+      <div class="app-info">
+        <span id="current-user">Loading...</span>
+        <button id="logout" class="btn btn-secondary">🚪 Sign Out</button>
+      </div>
+    </header>
+    
+    <main class="app-main">
+      <div class="dashboard-container">
+        <div class="welcome-section">
+          <h2>Welcome to Your Password Manager</h2>
+          <p>Manage your passwords securely and efficiently</p>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-number" id="total-passwords">-</div>
+            <div class="stat-label">Total Passwords</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="weak-passwords">-</div>
+            <div class="stat-label">Weak Passwords</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="recent-activity">-</div>
+            <div class="stat-label">Recent Activity</div>
+          </div>
+        </div>
+        
+        <!-- Main Actions -->
+        <div class="actions-grid">
+          <div class="action-card primary" id="password-generator">
+            <div class="card-icon">🔐</div>
+            <h3>Password Generator</h3>
+            <p>Generate strong, secure passwords with customizable options</p>
+            <button class="btn btn-primary">Generate Password</button>
+          </div>
+          
+          <div class="action-card" id="password-vault">
+            <div class="card-icon">🗃️</div>
+            <h3>Password Vault</h3>
+            <p>Store, organize, and manage all your passwords securely</p>
+            <button class="btn btn-secondary">Open Vault</button>
+          </div>
+          
+          <div class="action-card" id="security-center">
+            <div class="card-icon">🛡️</div>
+            <h3>Security Center</h3>
+            <p>Check password strength and security recommendations</p>
+            <button class="btn btn-secondary">Security Check</button>
+          </div>
+          
+          <div class="action-card" id="app-settings">
+            <div class="card-icon">⚙️</div>
+            <h3>Settings</h3>
+            <p>Configure app preferences, import/export data</p>
+            <button class="btn btn-secondary">Open Settings</button>
+          </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions-section">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions-grid">
+            <button id="quick-generate" class="btn btn-outline">
+              ⚡ Quick Generate
+            </button>
+            <button id="quick-strength" class="btn btn-outline">
+              🎯 Check Strength
+            </button>
+            <button id="quick-import" class="btn btn-outline">
+              📥 Import Data
+            </button>
+            <button id="quick-backup" class="btn btn-outline">
+              💾 Backup Data
+            </button>
+          </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="recent-section">
+          <h3>Recent Activity</h3>
+          <div id="recent-activity-list" class="activity-list">
+            <div class="activity-item">
+              <span class="activity-icon">🔐</span>
+              <span class="activity-text">Password generated</span>
+              <span class="activity-time">Just now</span>
+            </div>
+            <!-- More activity items will be loaded here -->
+          </div>
+        </div>
+        
+        <!-- Security Alerts -->
+        <div class="alerts-section" id="security-alerts" style="display: none;">
+          <h3>Security Alerts</h3>
+          <div class="alert-item warning">
+            <span class="alert-icon">⚠️</span>
+            <span class="alert-text">You have weak passwords that need attention</span>
+            <button class="btn btn-small">Review</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="app-footer">
+      <p>&copy; 2025 SecurePass Desktop. All rights reserved.</p>
+    </footer>
+  </div>
+  
+  <!-- Notification area -->
+  <div id="notification" class="notification"></div>
+  
+  <!-- JavaScript -->
+  <script src="../js/theme-manager.js"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

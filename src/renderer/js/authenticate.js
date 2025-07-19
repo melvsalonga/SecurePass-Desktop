@@ -43,7 +43,7 @@ class AuthenticationUI {
     const backButton = document.getElementById('back-home');
     if (backButton) {
       backButton.addEventListener('click', () => {
-        window.location.href = '../../index.html';
+        window.location.href = 'home.html';
       });
     }
 
@@ -87,9 +87,9 @@ class AuthenticationUI {
       if (response.success) {
         this.showResult('✅ Authentication successful! Redirecting...', 'success');
         
-        // Wait a moment then redirect to password generator
+        // Wait a moment then redirect to dashboard
         setTimeout(() => {
-          window.location.href = '../pages/generator.html';
+          window.location.href = 'dashboard.html';
         }, 1500);
       } else {
         this.showResult('❌ Authentication failed: ' + (response.error || 'Invalid credentials'), 'error');
