@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('node:path');
 const PasswordGenerator = require('../shared/password-generator');
 const EncryptionManager = require('./encryption');
@@ -6,9 +6,12 @@ const SimpleDatabaseManager = require('./simpleDatabaseManager');
 const AutoLockManager = require('./autoLockManager');
 const PasswordStorageManager = require('./passwordStorageManager');
 
+// Global window reference
+let mainWindow = null;
+
 // Function to create main application window
 const createMainWindow = () => {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -20,7 +23,93 @@ const createMainWindow = () => {
     }
   });
 
-  win.loadFile(path.resolve(__dirname, '../renderer/pages/home.html'));
+  mainWindow.loadFile(path.resolve(__dirname, '../renderer/pages/home.html'));
+  
+  // Clear reference when window is closed
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+  
+  return mainWindow;
+};
+
+// Handle keyboard shortcut actions
+const handleShortcutAction = async (action) => {
+  if (!mainWindow) {
+    console.warn('No main window available for shortcut action:', action);
+    return;
+  }
+  
+  try {
+    switch (action) {
+      case 'open-password-generator':
+        mainWindow.webContents.send('navigate-to', 'generator');
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        break;
+        
+      case 'force-lock-application':
+        await autoLockManager.forceLock();
+        mainWindow.webContents.send('force-lock');
+        break;
+        
+      case 'open-vault':
+        mainWindow.webContents.send('navigate-to', 'vault');
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        break;
+        
+      case 'open-dashboard':
+        mainWindow.webContents.send('navigate-to', 'dashboard');
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        break;
+        
+      case 'open-settings':
+        mainWindow.webContents.send('navigate-to', 'settings');
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        break;
+        
+      case 'generate-quick-password':
+        try {
+          const quickPassword = passwordGenerator.generatePassword({
+            length: 16,
+            includeUppercase: true,
+            includeLowercase: true,
+            includeNumbers: true,
+            includeSymbols: true
+          });
+          mainWindow.webContents.send('quick-password-generated', quickPassword);
+          if (mainWindow.isMinimized()) mainWindow.restore();
+          mainWindow.focus();
+        } catch (error) {
+          console.error('Quick password generation error:', error);
+        }
+        break;
+        
+      case 'show-keyboard-shortcuts':
+        mainWindow.webContents.send('show-shortcuts-help');
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        break;
+        
+      case 'quit-application':
+        app.quit();
+        break;
+        
+      case 'show-help':
+        mainWindow.webContents.send('show-help');
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        break;
+        
+      default:
+        console.warn('Unknown shortcut action:', action);
+    }
+  } catch (error) {
+    console.error('Error handling shortcut action:', action, error);
+  }
 };
 
 // Initialize password generator
@@ -41,6 +130,38 @@ let currentSession = {
 
 // Handle app ready event
 app.whenReady().then(async () => {
+  const { globalShortcut } = require('electron');
+
+  // Enhanced keyboard shortcut system
+  const shortcuts = {
+    'CommandOrControl+G': 'open-password-generator',
+    'CommandOrControl+L': 'force-lock-application',
+    'CommandOrControl+V': 'open-vault',
+    'CommandOrControl+D': 'open-dashboard',
+    'CommandOrControl+S': 'open-settings',
+    'CommandOrControl+Shift+G': 'generate-quick-password',
+    'CommandOrControl+H': 'show-keyboard-shortcuts',
+    'CommandOrControl+Q': 'quit-application',
+    'F1': 'show-help'
+  };
+
+  // Register all shortcuts
+  Object.entries(shortcuts).forEach(([key, action]) => {
+    const registered = globalShortcut.register(key, () => {
+      handleShortcutAction(action);
+    });
+    
+    if (!registered) {
+      console.warn(`Failed to register shortcut: ${key}`);
+    } else {
+      console.log(`Registered shortcut: ${key} -> ${action}`);
+    }
+  });
+
+  app.on('will-quit', () => {
+    // Unregister all shortcuts
+    globalShortcut.unregisterAll();
+  });
   await databaseManager.initialize();
 
   // Basic IPC handlers

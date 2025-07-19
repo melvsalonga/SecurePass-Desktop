@@ -75,6 +75,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onPasswordGenerated: (callback) => ipcRenderer.on('password-generated', (_event, password) => callback(password)),
   onSecurityAlert: (callback) => ipcRenderer.on('security-alert', (_event, alert) => callback(alert)),
   
+  // Keyboard shortcuts and navigation listeners
+  onNavigateTo: (callback) => ipcRenderer.on('navigate-to', (_event, page) => callback(page)),
+  onQuickPasswordGenerated: (callback) => ipcRenderer.on('quick-password-generated', (_event, password) => callback(password)),
+  onShowShortcutsHelp: (callback) => ipcRenderer.on('show-shortcuts-help', (_event) => callback()),
+  onShowHelp: (callback) => ipcRenderer.on('show-help', (_event) => callback()),
+  onForceLock: (callback) => ipcRenderer.on('force-lock', (_event) => callback()),
+  
   // Remove listeners
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
 })
