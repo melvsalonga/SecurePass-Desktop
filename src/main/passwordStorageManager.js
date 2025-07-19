@@ -201,6 +201,268 @@ class PasswordStorageManager {
   }
 
   /**
+   * Export all passwords to various formats
+   * @param {string} format - Export format ('json', 'csv', 'xml')
+   * @param {Object} options - Export options
+   * @returns {Promise<string>} Exported data as string
+   */
+  async exportPasswords(format = 'json', options = {}) {
+    try {
+      this.ensureReady();
+      
+      const passwords = await this.getAllPasswords();
+      const exportData = {
+        exported: new Date().toISOString(),
+        version: '1.0',
+        count: passwords.length,
+        passwords: passwords.map(entry => ({
+          title: entry.title || '',
+          username: entry.username || '',
+          password: options.includePasswords ? entry.password : '[HIDDEN]',
+          url: entry.url || '',
+          notes: entry.notes || '',
+          category: entry.category || 'General',
+          tags: entry.tags || '',
+          strength_score: entry.strength_score || 0,
+          created_at: entry.created_at,
+          updated_at: entry.updated_at,
+          last_used: entry.last_used
+        }))
+      };
+
+      switch (format.toLowerCase()) {
+        case 'json':
+          return JSON.stringify(exportData, null, 2);
+        
+        case 'csv':
+          const headers = ['Title', 'Username', 'Password', 'URL', 'Notes', 'Category', 'Tags', 'Strength Score', 'Created', 'Updated', 'Last Used'];
+          let csv = headers.join(',') + '\n';
+          
+          exportData.passwords.forEach(entry => {
+            const row = [
+              `"${(entry.title || '').replace(/"/g, '""')}"`,
+              `"${(entry.username || '').replace(/"/g, '""')}"`,
+              `"${(entry.password || '').replace(/"/g, '""')}"`,
+              `"${(entry.url || '').replace(/"/g, '""')}"`,
+              `"${(entry.notes || '').replace(/"/g, '""')}"`,
+              `"${(entry.category || '').replace(/"/g, '""')}"`,
+              `"${(entry.tags || '').replace(/"/g, '""')}"`,
+              entry.strength_score || 0,
+              `"${entry.created_at || ''}"`,
+              `"${entry.updated_at || ''}"`,
+              `"${entry.last_used || ''}"`
+            ];
+            csv += row.join(',') + '\n';
+          });
+          
+          return csv;
+        
+        case 'xml':
+          let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+          xml += '<securepass_export>\n';
+          xml += `  <metadata>\n`;
+          xml += `    <exported>${exportData.exported}</exported>\n`;
+          xml += `    <version>${exportData.version}</version>\n`;
+          xml += `    <count>${exportData.count}</count>\n`;
+          xml += `  </metadata>\n`;
+          xml += '  <passwords>\n';
+          
+          exportData.passwords.forEach(entry => {
+            xml += '    <password>\n';
+            xml += `      <title><![CDATA[${entry.title || ''}]]></title>\n`;
+            xml += `      <username><![CDATA[${entry.username || ''}]]></username>\n`;
+            xml += `      <password><![CDATA[${entry.password || ''}]]></password>\n`;
+            xml += `      <url><![CDATA[${entry.url || ''}]]></url>\n`;
+            xml += `      <notes><![CDATA[${entry.notes || ''}]]></notes>\n`;
+            xml += `      <category><![CDATA[${entry.category || ''}]]></category>\n`;
+            xml += `      <tags><![CDATA[${entry.tags || ''}]]></tags>\n`;
+            xml += `      <strength_score>${entry.strength_score || 0}</strength_score>\n`;
+            xml += `      <created_at>${entry.created_at || ''}</created_at>\n`;
+            xml += `      <updated_at>${entry.updated_at || ''}</updated_at>\n`;
+            xml += `      <last_used>${entry.last_used || ''}</last_used>\n`;
+            xml += '    </password>\n';
+          });
+          
+          xml += '  </passwords>\n';
+          xml += '</securepass_export>\n';
+          
+          return xml;
+        
+        default:
+          throw new Error(`Unsupported export format: ${format}`);
+      }
+    } catch (error) {
+      throw new Error(`Export failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Import passwords from various formats
+   * @param {string} data - Import data
+   * @param {string} format - Import format ('json', 'csv')
+   * @param {Object} options - Import options
+   * @returns {Promise<Object>} Import results
+   */
+  async importPasswords(data, format = 'json', options = {}) {
+    try {
+      this.ensureReady();
+      
+      let passwords = [];
+      const results = {
+        imported: 0,
+        skipped: 0,
+        errors: [],
+        duplicates: 0
+      };
+
+      switch (format.toLowerCase()) {
+        case 'json':
+          const jsonData = JSON.parse(data);
+          passwords = jsonData.passwords || jsonData || [];
+          break;
+        
+        case 'csv':
+          const lines = data.split('\n').filter(line => line.trim());
+          if (lines.length < 2) {
+            throw new Error('CSV file must contain headers and at least one data row');
+          }
+          
+          const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+          const titleIndex = headers.findIndex(h => h.includes('title') || h.includes('name'));
+          const usernameIndex = headers.findIndex(h => h.includes('username') || h.includes('user') || h.includes('email'));
+          const passwordIndex = headers.findIndex(h => h.includes('password'));
+          const urlIndex = headers.findIndex(h => h.includes('url') || h.includes('website') || h.includes('site'));
+          const notesIndex = headers.findIndex(h => h.includes('notes') || h.includes('description'));
+          const categoryIndex = headers.findIndex(h => h.includes('category') || h.includes('folder') || h.includes('group'));
+          
+          for (let i = 1; i < lines.length; i++) {
+            try {
+              const values = this.parseCSVLine(lines[i]);
+              if (values.length > 0) {
+                const entry = {
+                  title: titleIndex >= 0 ? values[titleIndex] || `Imported Entry ${i}` : `Imported Entry ${i}`,
+                  username: usernameIndex >= 0 ? values[usernameIndex] || '' : '',
+                  password: passwordIndex >= 0 ? values[passwordIndex] || '' : '',
+                  url: urlIndex >= 0 ? values[urlIndex] || '' : '',
+                  notes: notesIndex >= 0 ? values[notesIndex] || '' : '',
+                  category: categoryIndex >= 0 ? values[categoryIndex] || 'Imported' : 'Imported',
+                  tags: 'imported'
+                };
+                passwords.push(entry);
+              }
+            } catch (lineError) {
+              results.errors.push(`Line ${i + 1}: ${lineError.message}`);
+            }
+          }
+          break;
+        
+        default:
+          throw new Error(`Unsupported import format: ${format}`);
+      }
+
+      // Process each password
+      for (const entry of passwords) {
+        try {
+          // Validate required fields
+          if (!entry.title && !entry.username && !entry.password) {
+            results.skipped++;
+            continue;
+          }
+
+          // Check for duplicates if option is enabled
+          if (options.checkDuplicates) {
+            const existing = await this.searchPasswords(entry.title || entry.username);
+            if (existing.length > 0) {
+              const duplicate = existing.find(e => 
+                e.title === entry.title && 
+                e.username === entry.username && 
+                e.url === entry.url
+              );
+              if (duplicate) {
+                if (options.skipDuplicates) {
+                  results.duplicates++;
+                  continue;
+                }
+                // Update existing entry if not skipping duplicates
+                await this.updatePassword(duplicate.id, {
+                  ...entry,
+                  updated_at: new Date().toISOString()
+                });
+                results.imported++;
+                continue;
+              }
+            }
+          }
+
+          // Add new entry
+          const newEntry = {
+            title: entry.title || 'Untitled',
+            username: entry.username || '',
+            password: entry.password || '',
+            url: entry.url || '',
+            notes: entry.notes || '',
+            category: entry.category || 'Imported',
+            tags: entry.tags || 'imported',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          await this.addPassword(newEntry);
+          results.imported++;
+        } catch (entryError) {
+          results.errors.push(`Entry "${entry.title || 'Unknown'}": ${entryError.message}`);
+        }
+      }
+
+      return results;
+    } catch (error) {
+      throw new Error(`Import failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Parse CSV line handling quoted values with commas
+   * @param {string} line - CSV line to parse
+   * @returns {Array<string>} Array of values
+   */
+  parseCSVLine(line) {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while (i < line.length) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i += 2;
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+          i++;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // Field separator
+        values.push(current);
+        current = '';
+        i++;
+      } else {
+        current += char;
+        i++;
+      }
+    }
+
+    // Add the last value
+    values.push(current);
+    return values;
+  }
+  }
+
+  /**
    * Decrypt password entry
    * @param {Object} encryptedEntry - Encrypted password entry
    * @returns {Promise<Object>} Decrypted entry
