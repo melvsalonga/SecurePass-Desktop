@@ -25,9 +25,30 @@ class SecurePassRenderer {
   }
 
   /**
+   * Initialize theme based on system preference or stored preference
+   */
+  loadThemePreference() {
+    try {
+      const storedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (storedTheme) {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      } else if (systemPrefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    } catch (error) {
+      console.error('Failed to load theme preference:', error);
+    }
+  }
+
+  /**
    * Initialize the application
    */
   async initializeApp() {
+    this.loadThemePreference();
     try {
       // Check if electronAPI is available
       if (!window.electronAPI) {
