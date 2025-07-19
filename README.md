@@ -14,13 +14,24 @@ A secure, cross-platform password manager desktop application built with Electro
 
 ## 🚀 Features
 
-- **Password Generation** - Customizable with multiple character sets
-- **Strength Analysis** - Real-time entropy calculation and pattern detection
-- **Secure Storage** - Encrypted local database with better-sqlite3
-- **Cross-platform** - Windows, macOS, and Linux support
-- **Modern UI** - Responsive design with dark/light themes
-- **Import/Export** - Multiple format support
-- **Password Categorization** - Organize with tags and folders
+### Core Features
+- **Advanced Password Generation** - Customizable with multiple character sets, batch generation, and passphrase support
+- **Real-time Strength Analysis** - Entropy calculation, pattern detection, and time-to-crack estimation
+- **Secure Encrypted Storage** - AES-256 encrypted local database with comprehensive search and filtering
+- **Password Organization** - Categories, tags, and advanced search with duplicate detection
+- **Import/Export Support** - Multiple formats (JSON, CSV, XML) with data validation
+
+### Advanced Features
+- **Dark/Light Theme System** - Automatic theme switching with system preference detection
+- **Comprehensive Keyboard Shortcuts** - Global and local shortcuts with customizable mapping
+- **System Tray Integration** - Quick access menu with authentication-aware features
+- **Auto-lock Security** - Configurable inactivity detection with secure session cleanup
+- **Master Password Management** - Secure setup, authentication, and password change functionality
+
+### Technical Features
+- **Cross-platform Support** - Windows, macOS, and Linux compatibility
+- **Modern UI/UX** - Responsive design with smooth animations and accessibility support
+- **Secure Architecture** - Sandboxed processes, context isolation, and zero-knowledge design
 
 ## 📋 Requirements
 
@@ -71,18 +82,35 @@ A secure, cross-platform password manager desktop application built with Electro
 ```
 src/
 ├── main/                   # Main process (Electron)
-│   ├── main.js            # Application entry point
-│   ├── preload.js         # Secure preload script
-│   ├── database.js        # Database operations (coming soon)
-│   ├── encryption.js      # Encryption utilities (coming soon)
-│   └── security.js        # Security utilities (coming soon)
+│   ├── main.js            # Application entry point with IPC handlers
+│   ├── preload.js         # Secure preload script with contextBridge
+│   ├── trayManager.js     # System tray integration
+│   ├── autoLockManager.js # Auto-lock and session management
+│   ├── encryption.js      # AES-256 encryption utilities
+│   ├── simpleDatabaseManager.js # SQLite database operations
+│   └── passwordStorageManager.js # Encrypted password storage
 ├── renderer/              # Renderer process (UI)
+│   ├── components/        # Reusable UI components
+│   │   └── keyboard-shortcuts-modal.html
 │   ├── js/                # JavaScript files
-│   │   └── main.js        # Main renderer logic
+│   │   ├── main.js        # Main renderer logic
+│   │   ├── theme-manager.js # Theme switching system
+│   │   ├── keyboard-shortcuts-manager.js # Shortcuts management
+│   │   ├── generator.js   # Password generator UI
+│   │   ├── vault.js       # Password vault UI
+│   │   └── settings.js    # Settings management
+│   ├── pages/             # Application pages
+│   │   ├── home.html      # Main dashboard
+│   │   ├── generator.html # Password generator
+│   │   ├── vault.html     # Password vault
+│   │   └── settings.html  # Application settings
 │   └── styles/            # CSS files
-│       └── main.css       # Main styles
-├── shared/                # Shared utilities (coming soon)
-└── assets/                # Static assets (coming soon)
+│       ├── themes.css     # Theme system
+│       ├── main.css       # Base styles
+│       └── generator.css  # Generator-specific styles
+├── shared/                # Shared utilities
+│   └── password-generator.js # Core password generation logic
+└── assets/                # Static assets
 ```
 
 ### Code Quality
@@ -153,26 +181,43 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📊 Development Status
 
-This project is in active development. See the [tasks document](tasks.md) for current progress and upcoming features.
+**Current Status:** Phase 4 - Advanced Features (75% Complete)  
+**Overall Progress:** ~85% Complete  
 
-### Phase 1: Foundation ✅
-- [x] Electron app setup
-- [x] Secure architecture implementation
-- [x] Basic UI framework
-- [x] Development tools configuration
+See the [tasks document](tasks.md) for detailed progress and upcoming features.
 
-### Phase 2: Core Features (In Progress)
-- [ ] Password generation engine
-- [ ] Strength analysis
-- [ ] Basic UI components
+### Phase 1: Foundation ✅ (100%)
+- [x] Electron app setup with secure architecture
+- [x] IPC communication with contextBridge
+- [x] SQLite database integration
+- [x] Development tools and testing framework
 
-### Phase 3: Security & Storage (Planned)
-- [ ] Encryption implementation
-- [ ] Master password system
-- [ ] Secure storage
+### Phase 2: Core Features ✅ (100%)
+- [x] Advanced password generation engine
+- [x] Real-time strength analysis with entropy calculation
+- [x] Batch generation and passphrase support
+- [x] Interactive UI components with responsive design
+
+### Phase 3: Security & Storage ✅ (100%)
+- [x] AES-256 encryption implementation
+- [x] Argon2 master password system with authentication
+- [x] Encrypted password storage with categorization
+- [x] Auto-lock mechanism and session management
+- [x] Import/export functionality with data validation
+
+### Phase 4: Advanced Features 🔄 (75%)
+- [x] **Theme Switching System** - Dark/light themes with persistence
+- [x] **Keyboard Shortcuts** - Global and local shortcuts with customization
+- [x] **System Tray Integration** - Quick access menu with notifications
+- [ ] **Accessibility Improvements** - ARIA labels and keyboard navigation
+
+### Phase 5: Testing & Deployment ⏳ (Planned)
+- [ ] Comprehensive testing suite
+- [ ] Security auditing
+- [ ] Cross-platform builds
+- [ ] Distribution packages
 
 ---
 
 **Version:** 1.0.0  
-**Status:** Development  
-**Last Updated:** 2025-01-18
+**Status:** Development
