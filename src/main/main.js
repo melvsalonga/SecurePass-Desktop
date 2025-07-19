@@ -455,6 +455,27 @@ app.whenReady().then(async () => {
     }
   });
 
+  // Password import/export handlers
+  ipcMain.handle('export-passwords', async (event, format, options) => {
+    try {
+      const result = await passwordStorageManager.exportPasswords(format, options);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Export passwords error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('import-passwords', async (event, data, format, options) => {
+    try {
+      const result = await passwordStorageManager.importPasswords(data, format, options);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Import passwords error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   createMainWindow();
 
   app.on('activate', () => {
