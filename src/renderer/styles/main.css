@@ -245,6 +245,54 @@ body {
   animation: pulse 1.5s infinite;
 }
 
+/* Theme Toggle Button */
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  margin-left: var(--space-md);
+}
+
+.btn-theme-toggle {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-secondary);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 120px;
+  justify-content: center;
+}
+
+.btn-theme-toggle:hover {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--shadow-primary);
+}
+
+.btn-theme-toggle:active {
+  transform: translateY(0);
+}
+
+/* Header with theme toggle */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-header .app-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
 /* Utility classes */
 .text-center { text-align: center; }
 .text-left { text-align: left; }

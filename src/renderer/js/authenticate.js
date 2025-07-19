@@ -6,7 +6,24 @@
 class AuthenticationUI {
   constructor() {
     this.isAuthenticating = false;
+    this.themeManager = null;
+    this.initializeTheme();
     this.initializeEventListeners();
+  }
+
+  /**
+   * Initialize theme manager
+   */
+  initializeTheme() {
+    if (window.ThemeManager) {
+      this.themeManager = new window.ThemeManager();
+      
+      // Add theme toggle to header
+      const header = document.querySelector('.app-header');
+      if (header && this.themeManager) {
+        this.themeManager.createThemeToggle(header);
+      }
+    }
   }
 
   /**

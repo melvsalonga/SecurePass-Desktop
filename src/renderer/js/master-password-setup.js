@@ -11,8 +11,19 @@ class MasterPasswordSetup {
     this.username = '';
     this.isPasswordValid = false;
     this.isConfirmValid = false;
+    this.themeManager = null;
+    this.initializeTheme();
     this.initializeEventListeners();
     this.updateProgress();
+  }
+
+  /**
+   * Initialize theme manager
+   */
+  initializeTheme() {
+    if (window.ThemeManager) {
+      this.themeManager = new window.ThemeManager();
+    }
   }
 
   /**

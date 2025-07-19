@@ -4,6 +4,7 @@
 class SecurePassRenderer {
   constructor() {
     this.isInitialized = false;
+    this.themeManager = null;
     this.init();
   }
 
@@ -48,6 +49,11 @@ class SecurePassRenderer {
    * Initialize the application
    */
   async initializeApp() {
+    // Initialize theme manager
+    if (window.ThemeManager) {
+      this.themeManager = new window.ThemeManager();
+    }
+    
     this.loadThemePreference();
     try {
       // Check if electronAPI is available
@@ -108,6 +114,12 @@ class SecurePassRenderer {
     const getStartedButton = document.getElementById('get-started');
     if (getStartedButton) {
       getStartedButton.addEventListener('click', () => this.getStarted());
+    }
+
+    // Theme toggle integration
+    const header = document.querySelector('.app-header');
+    if (header && this.themeManager) {
+      this.themeManager.createThemeToggle(header);
     }
 
     // Window events

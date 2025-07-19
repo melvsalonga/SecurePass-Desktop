@@ -9,8 +9,25 @@ class PasswordGeneratorUI {
     this.currentPassphrase = '';
     this.passwordHistory = [];
     this.maxHistorySize = 50;
+    this.themeManager = null;
+    this.initializeTheme();
     this.initializeEventListeners();
     this.initializeNavigation();
+  }
+
+  /**
+   * Initialize the theme manager
+   */
+  initializeTheme() {
+    if (window.ThemeManager) {
+      this.themeManager = new window.ThemeManager();
+      
+      // Add theme toggle to header
+      const header = document.querySelector('.app-header');
+      if (header && this.themeManager) {
+        this.themeManager.createThemeToggle(header);
+      }
+    }
   }
 
   /**
@@ -677,7 +694,7 @@ class PasswordGeneratorUI {
     const backButton = document.getElementById('back-home');
     if (backButton) {
       backButton.addEventListener('click', () => {
-        window.location.href = '../index.html';
+        window.location.href = '../../index.html';
       });
     }
   }
