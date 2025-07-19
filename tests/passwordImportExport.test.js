@@ -17,8 +17,9 @@ describe('Password Import/Export', () => {
   let testDbPath;
 
   beforeEach(async () => {
-    // Create test database path
-    testDbPath = path.join(__dirname, 'test-import-export.db');
+    // Create unique test database path
+    const testId = Math.random().toString(36).substring(7);
+    testDbPath = path.join(__dirname, `test-import-export-${testId}.db`);
     
     // Initialize managers
     encryptionManager = new EncryptionManager();
