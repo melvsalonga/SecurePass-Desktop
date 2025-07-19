@@ -20,7 +20,7 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+/* Header - Standardized across all pages */
 .app-header {
   background: var(--bg-secondary);
   backdrop-filter: blur(10px);
@@ -29,17 +29,32 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid var(--border-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .app-header h1 {
   color: var(--text-primary);
   font-size: var(--font-3xl);
   font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 .app-info {
-  color: var(--text-secondary);
-  font-size: var(--font-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
 /* Main content */
@@ -325,18 +340,6 @@ body {
   transform: translateY(0);
 }
 
-/* Header with theme toggle */
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.app-header .app-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-}
 
 /* Authentication Form Styles */
 .auth-actions {

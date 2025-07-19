@@ -31,14 +31,15 @@
 }
 
 .generator-section {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 25px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: 0 2px 10px var(--shadow-light);
+  transition: var(--transition-normal);
   height: fit-content;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--border-secondary);
 }
 
 .generator-section:hover {
@@ -47,9 +48,9 @@
 
 .generator-section h2 {
   margin: 0 0 20px 0;
-  color: #2c3e50;
-  font-size: 1.5em;
-  border-bottom: 2px solid #3498db;
+  color: var(--text-primary);
+  font-size: var(--font-xl);
+  border-bottom: 2px solid var(--primary-color);
   padding-bottom: 10px;
 }
 
@@ -68,21 +69,23 @@
 .password-field input[type="text"] {
   flex: 1;
   padding: 12px 15px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid var(--border-secondary);
+  border-radius: var(--radius-md);
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  background-color: white;
-  transition: border-color 0.3s ease;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  transition: var(--transition-normal);
 }
 
 .password-field input[type="text"]:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--shadow-primary);
 }
 
 .password-field input[type="text"]::placeholder {
-  color: #999;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -100,35 +103,41 @@
 }
 
 .btn-primary {
-  background-color: #3498db;
-  color: white;
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 15px var(--shadow-primary);
 }
 
 .btn-primary:hover {
-  background-color: #2980b9;
-  transform: translateY(-2px);
+  background: var(--primary-color-hover);
+  transform: var(--active-transform);
+  box-shadow: 0 6px 20px var(--shadow-primary-hover);
 }
 
 .btn-secondary {
-  background-color: #95a5a6;
-  color: white;
+  background: var(--bg-card);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
 }
 
 .btn-secondary:hover {
-  background-color: #7f8c8d;
-  transform: translateY(-2px);
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  transform: var(--active-transform);
 }
 
 .btn-icon {
-  background-color: #ecf0f1;
-  color: #2c3e50;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   padding: 12px;
   font-size: 16px;
   min-width: 45px;
+  border: 1px solid var(--border-secondary);
 }
 
 .btn-icon:hover {
-  background-color: #bdc3c7;
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
 }
 
 /* Strength Meter */
@@ -587,32 +596,6 @@
   }
 }
 
-/* App Header */
-.app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px 0;
-  margin-bottom: 20px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 2.5em;
-  font-weight: 300;
-}
-
-.app-nav {
-  margin-top: 15px;
-}
-
-.app-main {
-  min-height: calc(100vh - 140px);
-  padding-bottom: 40px;
-  width: 100%;
-  overflow-x: hidden;
-}
 
 /* Animation for password generation */
 @keyframes pulse {
