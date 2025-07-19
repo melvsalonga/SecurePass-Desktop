@@ -22,10 +22,10 @@ class PasswordGeneratorUI {
     if (window.ThemeManager) {
       this.themeManager = new window.ThemeManager();
       
-      // Add theme toggle to header
-      const header = document.querySelector('.app-header');
-      if (header && this.themeManager) {
-        this.themeManager.createThemeToggle(header);
+      // Add theme toggle to the nav section (next to back button)
+      const appNav = document.querySelector('.app-nav');
+      if (appNav && this.themeManager) {
+        this.themeManager.createThemeToggle(appNav);
       }
     }
   }

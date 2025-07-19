@@ -117,7 +117,8 @@
 .btn-secondary {
   background: var(--bg-card);
   color: var(--primary-color);
-  border: 2px solid var(--primary-color);
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: none;
 }
 
 .btn-secondary:hover {

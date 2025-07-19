@@ -48,13 +48,20 @@ body {
 .app-info {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .app-nav {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+}
+
+/* Ensure theme toggle and back button are aligned properly */
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  margin: 0;
 }
 
 /* Main content */
@@ -211,12 +218,14 @@ body {
 .btn-secondary {
   background: var(--bg-card);
   color: var(--primary-color);
-  border: 2px solid var(--primary-color);
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: none;
 }
 
 .btn-secondary:hover {
   background: var(--primary-color);
   color: var(--text-inverse);
+  border-color: var(--primary-color) !important;
   transform: var(--active-transform);
 }
 

@@ -5,8 +5,25 @@
 
 class SettingsUI {
   constructor() {
+    this.themeManager = null;
+    this.initializeTheme();
     this.loadSettings();
     this.initializeEventListeners();
+  }
+
+  /**
+   * Initialize theme manager
+   */
+  initializeTheme() {
+    if (window.ThemeManager) {
+      this.themeManager = new window.ThemeManager();
+      
+      // Add theme toggle to the nav section (next to back button)
+      const appNav = document.querySelector('.app-nav');
+      if (appNav && this.themeManager) {
+        this.themeManager.createThemeToggle(appNav);
+      }
+    }
   }
 
   /**

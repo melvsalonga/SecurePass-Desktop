@@ -151,33 +151,38 @@
 }
 
 .btn-primary {
-  background-color: #3498db;
-  color: white;
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  box-shadow: 0 4px 15px var(--shadow-primary);
 }
 
 .btn-primary:hover {
-  background-color: #2980b9;
-  transform: translateY(-2px);
+  background: var(--primary-color-hover);
+  transform: var(--active-transform);
+  box-shadow: 0 6px 20px var(--shadow-primary-hover);
 }
 
 .btn-secondary {
-  background-color: #95a5a6;
-  color: white;
+  background: var(--bg-card);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: none;
 }
 
 .btn-secondary:hover {
-  background-color: #7f8c8d;
-  transform: translateY(-2px);
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  transform: var(--active-transform);
 }
 
 .btn-danger {
-  background-color: #e74c3c;
-  color: white;
+  background: var(--text-error);
+  color: var(--text-inverse);
 }
 
 .btn-danger:hover {
-  background-color: #c0392b;
-  transform: translateY(-2px);
+  background: #c0392b;
+  transform: var(--active-transform);
 }
 
 /* Responsive Design */

@@ -354,23 +354,27 @@
 
 .btn-primary {
   background: var(--primary-color);
-  color: white;
+  color: var(--text-inverse);
+  box-shadow: 0 4px 15px var(--shadow-primary);
 }
 
 .btn-primary:hover {
   background: var(--primary-color-hover);
-  transform: translateY(-1px);
+  transform: var(--active-transform);
+  box-shadow: 0 6px 20px var(--shadow-primary-hover);
 }
 
 .btn-secondary {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-secondary);
+  background: var(--bg-card);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color) !important;
+  box-shadow: none;
 }
 
 .btn-secondary:hover {
-  background: var(--bg-tertiary);
-  transform: translateY(-1px);
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  transform: var(--active-transform);
 }
 
 .btn-icon {
