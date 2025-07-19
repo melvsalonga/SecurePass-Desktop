@@ -419,6 +419,75 @@ class PasswordStorageManager {
       throw new Error(`Failed to get organizational insights: ${error.message}`);
     }
   }
+
+  /**
+   * Advanced search with multiple criteria and ranking
+   * @param {Object} searchCriteria - Comprehensive search criteria
+   * @returns {Promise<Array>} Ranked search results
+   */
+  async advancedSearch(searchCriteria) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.advancedSearch(searchCriteria);
+    } catch (error) {
+      throw new Error(`Failed to perform advanced search: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get search suggestions based on partial input
+   * @param {string} input - Partial search input
+   * @param {number} limit - Maximum number of suggestions
+   * @returns {Promise<Array>} Array of search suggestions
+   */
+  async getSearchSuggestions(input, limit = 10) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getSearchSuggestions(input, limit);
+    } catch (error) {
+      throw new Error(`Failed to get search suggestions: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries with duplicate passwords
+   * @returns {Promise<Array>} Array of entries with duplicate passwords
+   */
+  async getDuplicatePasswords() {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getDuplicatePasswords();
+    } catch (error) {
+      throw new Error(`Failed to get duplicate passwords: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries that haven't been updated recently
+   * @param {number} daysThreshold - Number of days to consider as "old"
+   * @returns {Promise<Array>} Array of old entries
+   */
+  async getOldEntries(daysThreshold = 90) {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getOldEntries(daysThreshold);
+    } catch (error) {
+      throw new Error(`Failed to get old entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get comprehensive security analysis of all passwords
+   * @returns {Promise<Object>} Security analysis report
+   */
+  async getSecurityAnalysis() {
+    try {
+      this.ensureReady();
+      return await this.passwordDatabase.getSecurityAnalysis();
+    } catch (error) {
+      throw new Error(`Failed to get security analysis: ${error.message}`);
+    }
+  }
 }
 
 module.exports = PasswordStorageManager;

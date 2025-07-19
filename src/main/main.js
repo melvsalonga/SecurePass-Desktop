@@ -404,6 +404,57 @@ app.whenReady().then(async () => {
     }
   });
 
+  // Advanced search and filter handlers
+  ipcMain.handle('advanced-search', async (event, searchCriteria) => {
+    try {
+      const result = await passwordStorageManager.advancedSearch(searchCriteria);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Advanced search error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-search-suggestions', async (event, input, limit) => {
+    try {
+      const result = await passwordStorageManager.getSearchSuggestions(input, limit);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get search suggestions error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-duplicate-passwords', async () => {
+    try {
+      const result = await passwordStorageManager.getDuplicatePasswords();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get duplicate passwords error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-old-entries', async (event, daysThreshold) => {
+    try {
+      const result = await passwordStorageManager.getOldEntries(daysThreshold);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get old entries error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('get-security-analysis', async () => {
+    try {
+      const result = await passwordStorageManager.getSecurityAnalysis();
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('Get security analysis error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   createMainWindow();
 
   app.on('activate', () => {

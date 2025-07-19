@@ -402,17 +402,22 @@ class PasswordDatabase {
       const searchQuery = query.toLowerCase();
       
       let filteredEntries = allEntries;
-      
-      // Apply text search
-      if (query) {
-        filteredEntries = filteredEntries.filter(entry => 
-          entry.title.toLowerCase().includes(searchQuery) ||
-          entry.username.toLowerCase().includes(searchQuery) ||
-          entry.url.toLowerCase().includes(searchQuery) ||
-          entry.notes.toLowerCase().includes(searchQuery) ||
-          (entry.tags || []).some(tag => tag.toLowerCase().includes(searchQuery))
-        );
-      }
+
+      // Advanced text search with ranking
+      const rankedResults = allEntries.map(entry => {
+        let rank = 0;
+
+        if (entry.title.toLowerCase().includes(searchQuery)) rank += 3;
+        if (entry.username.toLowerCase().includes(searchQuery)) rank += 2;
+        if (entry.url.toLowerCase().includes(searchQuery)) rank += 1;
+        if (entry.notes.toLowerCase().includes(searchQuery)) rank += 2;
+        if ((entry.tags || []).some(tag => tag.toLowerCase().includes(searchQuery))) rank += 1;
+
+        return { entry, rank };
+      }).filter(({ rank }) => rank > 0);
+
+      // Sort by rank
+      filteredEntries = rankedResults.sort((a, b) => b.rank - a.rank).map(({ entry }) => entry);
       
       // Apply category filter
       if (filters.category && filters.category !== 'All') {
@@ -688,7 +693,7 @@ class PasswordDatabase {
     try {
       const entries = await this.getAllEntries();
       return entries.filter(entry => 
-        tags.every(tag => entry.tags.includes(tag))
+        tags.every(tag => (entry.tags || []).includes(tag))
       );
     } catch (error) {
       throw new Error(`Failed to get entries by tags: ${error.message}`);
@@ -882,6 +887,307 @@ class PasswordDatabase {
     } catch (error) {
       throw new Error(`Failed to get organizational insights: ${error.message}`);
     }
+  }
+
+  /**
+   * Advanced search with multiple criteria and ranking
+   * @param {Object} searchCriteria - Comprehensive search criteria
+   * @returns {Promise<Array>} Ranked search results
+   */
+  async advancedSearch(searchCriteria) {
+    try {
+      const {
+        query = '',
+        categories = [],
+        tags = [],
+        strength = null,
+        lastUsed = null,
+        createdAfter = null,
+        createdBefore = null,
+        hasNotes = null,
+        sortBy = 'relevance'
+      } = searchCriteria;
+
+      const allEntries = await this.getAllEntries();
+      const searchQuery = query.toLowerCase();
+      
+      // Apply filters and calculate relevance scores
+      const filteredAndRanked = allEntries.map(entry => {
+        let rank = 0;
+        let passes = true;
+        
+        // Text search with weighted scoring
+        if (query) {
+          const titleMatch = entry.title.toLowerCase().includes(searchQuery);
+          const usernameMatch = entry.username.toLowerCase().includes(searchQuery);
+          const urlMatch = entry.url.toLowerCase().includes(searchQuery);
+          const notesMatch = entry.notes.toLowerCase().includes(searchQuery);
+          const tagMatch = (entry.tags || []).some(tag => tag.toLowerCase().includes(searchQuery));
+          
+          if (titleMatch) rank += 10; // Highest priority
+          if (usernameMatch) rank += 6;
+          if (urlMatch) rank += 4;
+          if (notesMatch) rank += 3;
+          if (tagMatch) rank += 2;
+          
+          // Bonus for exact matches
+          if (entry.title.toLowerCase() === searchQuery) rank += 15;
+          if (entry.username.toLowerCase() === searchQuery) rank += 10;
+          
+          // Must have at least one text match to pass
+          if (!titleMatch && !usernameMatch && !urlMatch && !notesMatch && !tagMatch) {
+            passes = false;
+          }
+        }
+        
+        // Category filter
+        if (categories.length > 0 && !categories.includes(entry.category)) {
+          passes = false;
+        }
+        
+        // Tags filter (AND operation)
+        if (tags.length > 0) {
+          const entryTags = entry.tags || [];
+          if (!tags.every(tag => entryTags.includes(tag))) {
+            passes = false;
+          }
+        }
+        
+        // Date filters
+        if (createdAfter && new Date(entry.createdAt) < new Date(createdAfter)) {
+          passes = false;
+        }
+        if (createdBefore && new Date(entry.createdAt) > new Date(createdBefore)) {
+          passes = false;
+        }
+        
+        // Notes filter
+        if (hasNotes !== null) {
+          const entryHasNotes = entry.notes && entry.notes.trim().length > 0;
+          if (hasNotes !== entryHasNotes) {
+            passes = false;
+          }
+        }
+        
+        // Recency bonus (newer entries get slight boost)
+        const daysSinceCreated = (Date.now() - new Date(entry.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+        const recencyBonus = Math.max(0, 1 - daysSinceCreated / 365); // Diminishes over a year
+        rank += recencyBonus;
+        
+        return { entry, rank, passes };
+      }).filter(({ passes }) => passes);
+      
+      // Sort results
+      let sortedResults;
+      switch (sortBy) {
+        case 'title':
+          sortedResults = filteredAndRanked.sort((a, b) => a.entry.title.localeCompare(b.entry.title));
+          break;
+        case 'created':
+          sortedResults = filteredAndRanked.sort((a, b) => new Date(b.entry.createdAt) - new Date(a.entry.createdAt));
+          break;
+        case 'updated':
+          sortedResults = filteredAndRanked.sort((a, b) => new Date(b.entry.updatedAt) - new Date(a.entry.updatedAt));
+          break;
+        case 'category':
+          sortedResults = filteredAndRanked.sort((a, b) => a.entry.category.localeCompare(b.entry.category));
+          break;
+        case 'relevance':
+        default:
+          sortedResults = filteredAndRanked.sort((a, b) => b.rank - a.rank);
+      }
+      
+      return sortedResults.map(({ entry, rank }) => ({ ...entry, _relevanceScore: rank }));
+    } catch (error) {
+      throw new Error(`Advanced search failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get search suggestions based on partial input
+   * @param {string} input - Partial search input
+   * @param {number} limit - Maximum number of suggestions
+   * @returns {Promise<Array>} Array of search suggestions
+   */
+  async getSearchSuggestions(input, limit = 10) {
+    try {
+      const entries = await this.getAllEntries();
+      const inputLower = input.toLowerCase();
+      const suggestions = new Set();
+      
+      entries.forEach(entry => {
+        // Title suggestions
+        if (entry.title.toLowerCase().startsWith(inputLower)) {
+          suggestions.add(entry.title);
+        }
+        
+        // Username suggestions
+        if (entry.username.toLowerCase().startsWith(inputLower)) {
+          suggestions.add(entry.username);
+        }
+        
+        // Tag suggestions
+        (entry.tags || []).forEach(tag => {
+          if (tag.toLowerCase().startsWith(inputLower)) {
+            suggestions.add(tag);
+          }
+        });
+        
+        // Category suggestions
+        if (entry.category.toLowerCase().startsWith(inputLower)) {
+          suggestions.add(entry.category);
+        }
+      });
+      
+      return Array.from(suggestions)
+        .sort((a, b) => a.length - b.length) // Shorter matches first
+        .slice(0, limit);
+    } catch (error) {
+      throw new Error(`Failed to get search suggestions: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries with duplicate passwords
+   * @returns {Promise<Array>} Array of entries with duplicate passwords
+   */
+  async getDuplicatePasswords() {
+    try {
+      const entries = await this.getAllEntries();
+      const passwordMap = new Map();
+      const duplicates = [];
+      
+      // Group entries by password
+      entries.forEach(entry => {
+        const password = entry.password;
+        if (!passwordMap.has(password)) {
+          passwordMap.set(password, []);
+        }
+        passwordMap.get(password).push(entry);
+      });
+      
+      // Find groups with more than one entry
+      passwordMap.forEach(entriesWithSamePassword => {
+        if (entriesWithSamePassword.length > 1) {
+          duplicates.push({
+            password: entriesWithSamePassword[0].password,
+            entries: entriesWithSamePassword.map(e => ({
+              id: e.id,
+              title: e.title,
+              username: e.username,
+              category: e.category
+            }))
+          });
+        }
+      });
+      
+      return duplicates;
+    } catch (error) {
+      throw new Error(`Failed to find duplicate passwords: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get entries that haven't been updated recently
+   * @param {number} daysThreshold - Number of days to consider as "old"
+   * @returns {Promise<Array>} Array of old entries
+   */
+  async getOldEntries(daysThreshold = 90) {
+    try {
+      const entries = await this.getAllEntries();
+      const thresholdDate = new Date(Date.now() - daysThreshold * 24 * 60 * 60 * 1000);
+      
+      return entries.filter(entry => {
+        const updatedDate = new Date(entry.updatedAt);
+        return updatedDate < thresholdDate;
+      }).map(entry => ({
+        ...entry,
+        daysSinceUpdate: Math.floor((Date.now() - new Date(entry.updatedAt).getTime()) / (1000 * 60 * 60 * 24))
+      }));
+    } catch (error) {
+      throw new Error(`Failed to get old entries: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get comprehensive security analysis of all passwords
+   * @returns {Promise<Object>} Security analysis report
+   */
+  async getSecurityAnalysis() {
+    try {
+      const entries = await this.getAllEntries();
+      const duplicates = await this.getDuplicatePasswords();
+      const oldEntries = await this.getOldEntries(90);
+      
+      const analysis = {
+        totalEntries: entries.length,
+        duplicatePasswords: duplicates.length,
+        oldPasswords: oldEntries.length,
+        weakPasswords: 0,
+        strongPasswords: 0,
+        averagePasswordLength: 0,
+        passwordLengthDistribution: {},
+        categoryRisks: {},
+        recommendations: []
+      };
+      
+      let totalPasswordLength = 0;
+      const lengthCounts = {};
+      
+      entries.forEach(entry => {
+        const password = entry.password;
+        const length = password.length;
+        
+        totalPasswordLength += length;
+        lengthCounts[length] = (lengthCounts[length] || 0) + 1;
+        
+        // Simple strength analysis
+        if (this.isWeakPassword(password)) {
+          analysis.weakPasswords++;
+        } else {
+          analysis.strongPasswords++;
+        }
+      });
+      
+      analysis.averagePasswordLength = entries.length > 0 ? Math.round(totalPasswordLength / entries.length) : 0;
+      analysis.passwordLengthDistribution = lengthCounts;
+      
+      // Generate recommendations
+      if (analysis.duplicatePasswords > 0) {
+        analysis.recommendations.push(`You have ${analysis.duplicatePasswords} duplicate passwords. Consider updating them.`);
+      }
+      
+      if (analysis.weakPasswords > 0) {
+        analysis.recommendations.push(`${analysis.weakPasswords} passwords are considered weak. Consider strengthening them.`);
+      }
+      
+      if (analysis.oldPasswords > 0) {
+        analysis.recommendations.push(`${analysis.oldPasswords} passwords haven't been updated in 90+ days. Consider refreshing them.`);
+      }
+      
+      return analysis;
+    } catch (error) {
+      throw new Error(`Failed to perform security analysis: ${error.message}`);
+    }
+  }
+
+  /**
+   * Simple password strength checker
+   * @param {string} password - Password to check
+   * @returns {boolean} True if password is considered weak
+   */
+  isWeakPassword(password) {
+    if (password.length < 8) return true;
+    if (password.length < 12 && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/.test(password)) return true;
+    
+    // Common weak patterns
+    const weakPatterns = [
+      /^(password|123456|qwerty|abc123|admin|letmein)/i,
+      /^.*(.)\1{3,}.*$/, // 4+ repeated characters
+      /^(.)\1+$/ // All same character
+    ];
+    
+    return weakPatterns.some(pattern => pattern.test(password));
   }
 }
 
