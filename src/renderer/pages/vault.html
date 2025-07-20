@@ -15,131 +15,179 @@
 </head>
 <body>
     <div id="app">
-        <header class="app-header">
+        <header class="app-header" role="banner">
             <h1>🗂️ Password Vault</h1>
             <div class="app-info">
-                <nav class="app-nav">
-                    <button id="back-home" class="btn btn-secondary">← Back to Home</button>
+                <nav class="app-nav" role="navigation" aria-label="Page navigation">
+                    <button id="back-home" class="btn btn-secondary" aria-label="Go back to home page">← Back to Home</button>
                 </nav>
             </div>
         </header>
         
-        <main class="app-main full-width">
+        <main class="app-main full-width" id="main-content" role="main">
             <div class="vault-container">
                 <!-- Vault Controls -->
-                <section class="vault-controls">
+                <section class="vault-controls" aria-labelledby="vault-controls-heading">
+                    <h2 id="vault-controls-heading" class="sr-only">Vault Controls</h2>
                     <div class="search-section">
                         <div class="search-field">
-                            <input type="search" id="search-passwords" placeholder="Search passwords..." class="search-input">
-                            <button id="clear-search" class="btn btn-icon" title="Clear search">✕</button>
+                            <label for="search-passwords" class="sr-only">Search passwords</label>
+                            <input type="search" id="search-passwords" placeholder="Search passwords..." 
+                                   class="search-input" aria-describedby="search-help">
+                            <div id="search-help" class="sr-only">Search by title, username, URL, or category</div>
+                            <button id="clear-search" class="btn btn-icon" aria-label="Clear search">✕</button>
                         </div>
-                        <div class="filter-section">
-                            <select id="category-filter" class="filter-select">
+                        <div class="filter-section" role="group" aria-label="Filter and sort options">
+                            <label for="category-filter" class="sr-only">Filter by category</label>
+                            <select id="category-filter" class="filter-select" aria-describedby="category-help">
                                 <option value="">All Categories</option>
                             </select>
-                            <select id="sort-options" class="filter-select">
+                            <div id="category-help" class="sr-only">Filter passwords by category</div>
+                            
+                            <label for="sort-options" class="sr-only">Sort passwords</label>
+                            <select id="sort-options" class="filter-select" aria-describedby="sort-help">
                                 <option value="title-asc">Title (A-Z)</option>
                                 <option value="title-desc">Title (Z-A)</option>
                                 <option value="date-desc">Recently Added</option>
                                 <option value="date-asc">Oldest First</option>
                             </select>
+                            <div id="sort-help" class="sr-only">Choose how to sort the password list</div>
                         </div>
                     </div>
                     
-                    <div class="action-buttons">
-                        <button id="add-password" class="btn btn-primary">+ Add Password</button>
-                        <button id="import-passwords" class="btn btn-secondary">📥 Import</button>
-                        <button id="export-passwords" class="btn btn-secondary">📤 Export</button>
+                    <div class="action-buttons" role="group" aria-label="Vault actions">
+                        <button id="add-password" class="btn btn-primary" aria-describedby="add-help">
+                            + Add Password
+                            <span id="add-help" class="sr-only">Add a new password entry to the vault</span>
+                        </button>
+                        <button id="import-passwords" class="btn btn-secondary" aria-describedby="import-help">
+                            📥 Import
+                            <span id="import-help" class="sr-only">Import passwords from other password managers</span>
+                        </button>
+                        <button id="export-passwords" class="btn btn-secondary" aria-describedby="export-help">
+                            📤 Export
+                            <span id="export-help" class="sr-only">Export your passwords to a file</span>
+                        </button>
                     </div>
                 </section>
 
                 <!-- Vault Entries -->
-                <section class="vault-entries-section">
-                    <div class="vault-stats">
+                <section class="vault-entries-section" aria-labelledby="vault-entries-heading">
+                    <h2 id="vault-entries-heading" class="sr-only">Password Vault Entries</h2>
+                    <div class="vault-stats" role="group" aria-label="Vault statistics">
                         <div class="stat-item">
-                            <span class="stat-number" id="total-entries">0</span>
+                            <span class="stat-number" id="total-entries" aria-live="polite">0</span>
                             <span class="stat-label">Total Passwords</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number" id="categories-count">0</span>
+                            <span class="stat-number" id="categories-count" aria-live="polite">0</span>
                             <span class="stat-label">Categories</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number" id="weak-passwords">0</span>
+                            <span class="stat-number" id="weak-passwords" aria-live="polite">0</span>
                             <span class="stat-label">Weak Passwords</span>
                         </div>
                     </div>
                     
-                    <div id="vault-entries" class="vault-entries">
+                    <div id="vault-entries" class="vault-entries" role="list" 
+                         aria-label="Password entries" aria-live="polite">
                         <!-- Password entries will be listed here -->
                     </div>
                     
-                    <div id="empty-state" class="empty-state" style="display: none;">
-                        <div class="empty-icon">🔐</div>
-                        <h3>No passwords yet</h3>
+                    <div id="empty-state" class="empty-state" style="display: none;" 
+                         role="region" aria-labelledby="empty-state-heading">
+                        <div class="empty-icon" aria-hidden="true">🔐</div>
+                        <h3 id="empty-state-heading">No passwords yet</h3>
                         <p>Add your first password to get started with SecurePass</p>
-                        <button id="add-first-password" class="btn btn-primary">Add Your First Password</button>
+                        <button id="add-first-password" class="btn btn-primary" aria-describedby="first-password-help">
+                            Add Your First Password
+                            <span id="first-password-help" class="sr-only">Open form to add your first password entry</span>
+                        </button>
                     </div>
                 </section>
             </div>
         </main>
         
-        <footer class="app-footer">
+        <footer class="app-footer" role="contentinfo">
             <p>&copy; 2025 SecurePass Desktop. All rights reserved.</p>
         </footer>
     </div>
 
     <!-- Password Entry Modal -->
-    <div id="password-modal" class="modal" style="display: none;">
+    <div id="password-modal" class="modal" style="display: none;" 
+         role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">Add Password</h3>
-                <button id="close-modal" class="btn btn-icon">✕</button>
+                <button id="close-modal" class="btn btn-icon" aria-label="Close dialog">✕</button>
             </div>
-            <form id="password-form" class="modal-form">
+            <form id="password-form" class="modal-form" role="form" aria-labelledby="modal-title">
                 <div class="form-group">
                     <label for="entry-title">Title:</label>
-                    <input type="text" id="entry-title" required>
+                    <input type="text" id="entry-title" required aria-required="true" 
+                           aria-describedby="title-help">
+                    <div id="title-help" class="sr-only">Enter a descriptive title for this password entry</div>
                 </div>
                 <div class="form-group">
                     <label for="entry-username">Username/Email:</label>
-                    <input type="text" id="entry-username">
+                    <input type="text" id="entry-username" aria-describedby="username-help">
+                    <div id="username-help" class="sr-only">Enter the username or email associated with this account</div>
                 </div>
                 <div class="form-group">
                     <label for="entry-password">Password:</label>
-                    <div class="password-input-group">
-                        <input type="password" id="entry-password" required>
-                        <button type="button" id="toggle-password" class="btn btn-icon">👁️</button>
-                        <button type="button" id="generate-new-password" class="btn btn-secondary">Generate</button>
+                    <div class="password-input-group" role="group" aria-labelledby="password-input-label">
+                        <div id="password-input-label" class="sr-only">Password input with visibility toggle and generate options</div>
+                        <input type="password" id="entry-password" required aria-required="true"
+                               aria-describedby="entry-password-help">
+                        <div id="entry-password-help" class="sr-only">Enter a secure password for this account</div>
+                        <button type="button" id="toggle-password" class="btn btn-icon" 
+                                aria-label="Toggle password visibility" aria-pressed="false">👁️</button>
+                        <button type="button" id="generate-new-password" class="btn btn-secondary" 
+                                aria-describedby="generate-password-help">
+                            Generate
+                            <span id="generate-password-help" class="sr-only">Generate a secure password automatically</span>
+                        </button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="entry-url">Website URL:</label>
-                    <input type="url" id="entry-url">
+                    <input type="url" id="entry-url" aria-describedby="url-help">
+                    <div id="url-help" class="sr-only">Enter the website URL where this password is used</div>
                 </div>
                 <div class="form-group">
                     <label for="entry-category">Category:</label>
-                    <input type="text" id="entry-category" placeholder="e.g., Work, Personal, Banking">
+                    <input type="text" id="entry-category" 
+                           placeholder="e.g., Work, Personal, Banking" 
+                           aria-describedby="category-help">
+                    <div id="category-help" class="sr-only">Assign this password to a category for organization</div>
                 </div>
                 <div class="form-group">
                     <label for="entry-tags">Tags (comma-separated):</label>
-                    <input type="text" id="entry-tags" placeholder="e.g., work, important, 2fa">
+                    <input type="text" id="entry-tags" 
+                           placeholder="e.g., work, important, 2fa" 
+                           aria-describedby="tags-help">
+                    <div id="tags-help" class="sr-only">Add comma-separated tags to help organize and find this password</div>
                 </div>
                 <div class="form-group">
                     <label for="entry-notes">Notes:</label>
-                    <textarea id="entry-notes" rows="3"></textarea>
+                    <textarea id="entry-notes" rows="3" aria-describedby="notes-help"></textarea>
+                    <div id="notes-help" class="sr-only">Add any additional notes or information about this password</div>
                 </div>
-                <div class="form-actions">
-                    <button type="button" id="cancel-entry" class="btn btn-secondary">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Password</button>
+                <div class="form-actions" role="group" aria-label="Form actions">
+                    <button type="button" id="cancel-entry" class="btn btn-secondary" aria-label="Cancel and close dialog">Cancel</button>
+                    <button type="submit" class="btn btn-primary" aria-describedby="save-help">
+                        Save Password
+                        <span id="save-help" class="sr-only">Save this password entry to the vault</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Notification area -->
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="notification" aria-live="assertive" aria-atomic="true" role="alert"></div>
 
+    <script src="../js/accessibility-manager.js"></script>
     <script src="../js/theme-manager.js"></script>
     <script src="../js/keyboard-shortcuts-manager.js"></script>
     <script src="../js/vault.js"></script>

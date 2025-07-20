@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Password Generator - SecurePass Desktop</title>
@@ -10,6 +10,9 @@
   <!-- Viewport for responsive design -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- Accessibility metadata -->
+  <meta name="description" content="SecurePass Desktop - Generate secure passwords and passphrases">
+  
   <!-- CSS -->
   <link rel="stylesheet" href="../styles/themes.css">
   <link rel="stylesheet" href="../styles/main.css">
@@ -17,94 +20,120 @@
 </head>
 <body>
   <div id="app">
-    <header class="app-header">
+    <header class="app-header" role="banner">
       <h1>🔑 Password Generator</h1>
       <div class="app-info">
-        <nav class="app-nav">
-          <button id="back-home" class="btn btn-secondary">← Back to Home</button>
+        <nav class="app-nav" role="navigation" aria-label="Page navigation">
+          <button id="back-home" class="btn btn-secondary" aria-label="Go back to home page">← Back to Home</button>
           <!-- Theme toggle will be added here by JavaScript -->
         </nav>
       </div>
     </header>
     
-    <main class="app-main full-width">
+    <main class="app-main full-width" id="main-content" role="main">
       <div class="generator-container">
         <!-- Password Generation Section -->
-        <section class="generator-section">
-          <h2>Generate Secure Password</h2>
+        <section class="generator-section" aria-labelledby="password-gen-heading">
+          <h2 id="password-gen-heading">Generate Secure Password</h2>
           
           <div class="password-output">
             <div class="password-field">
-              <input type="text" id="generated-password" readonly placeholder="Click 'Generate' to create a password">
-              <button id="copy-password" class="btn btn-icon" title="Copy to clipboard">📋</button>
-              <button id="generate-password" class="btn btn-primary">Generate</button>
+              <input type="text" id="generated-password" readonly 
+                     placeholder="Click 'Generate' to create a password"
+                     aria-label="Generated password output" 
+                     aria-describedby="password-instructions">
+              <div id="password-instructions" class="sr-only">Generated password will appear here. Use copy button to copy to clipboard.</div>
+              <button id="copy-password" class="btn btn-icon" aria-label="Copy password to clipboard">📋</button>
+              <button id="generate-password" class="btn btn-primary" aria-describedby="generate-help">
+                Generate
+                <span id="generate-help" class="sr-only">Generate a new password with current settings</span>
+              </button>
             </div>
             
-            <div class="strength-meter">
-              <div class="strength-bar">
+            <div class="strength-meter" aria-labelledby="strength-heading">
+              <div id="strength-heading" class="sr-only">Password Strength Analysis</div>
+              <div class="strength-bar" role="progressbar" 
+                   aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"
+                   aria-label="Password strength" aria-describedby="strength-description">
                 <div id="strength-fill" class="strength-fill"></div>
               </div>
               <div class="strength-info">
-                <span id="strength-level">No password generated</span>
-                <span id="strength-score"></span>
+                <span id="strength-level" aria-live="polite">No password generated</span>
+                <span id="strength-score" aria-live="polite"></span>
+                <div id="strength-description" class="sr-only">Strength meter shows password security level from weak to very strong</div>
               </div>
             </div>
           </div>
           
           <!-- Password Options -->
-          <div class="options-grid">
+          <fieldset class="options-grid" aria-labelledby="password-options-heading">
+            <legend id="password-options-heading" class="sr-only">Password Generation Options</legend>
             <div class="option-group">
-              <label for="password-length">Length: <span id="length-value">16</span></label>
-              <input type="range" id="password-length" min="4" max="128" value="16">
+              <label for="password-length">Length: <span id="length-value" aria-live="polite">16</span></label>
+              <input type="range" id="password-length" min="4" max="128" value="16"
+                     aria-describedby="length-help">
+              <div id="length-help" class="sr-only">Choose password length between 4 and 128 characters</div>
             </div>
             
             <div class="option-group">
               <label>
-                <input type="checkbox" id="include-lowercase" checked>
+                <input type="checkbox" id="include-lowercase" checked 
+                       aria-describedby="lowercase-help">
                 Include Lowercase (a-z)
+                <span id="lowercase-help" class="sr-only">Include lowercase letters a through z in password</span>
               </label>
             </div>
             
             <div class="option-group">
               <label>
-                <input type="checkbox" id="include-uppercase" checked>
+                <input type="checkbox" id="include-uppercase" checked
+                       aria-describedby="uppercase-help">
                 Include Uppercase (A-Z)
+                <span id="uppercase-help" class="sr-only">Include uppercase letters A through Z in password</span>
               </label>
             </div>
             
             <div class="option-group">
               <label>
-                <input type="checkbox" id="include-numbers" checked>
+                <input type="checkbox" id="include-numbers" checked
+                       aria-describedby="numbers-help">
                 Include Numbers (0-9)
+                <span id="numbers-help" class="sr-only">Include digits 0 through 9 in password</span>
               </label>
             </div>
             
             <div class="option-group">
               <label>
-                <input type="checkbox" id="include-symbols" checked>
+                <input type="checkbox" id="include-symbols" checked
+                       aria-describedby="symbols-help">
                 Include Symbols (!@#$...)
+                <span id="symbols-help" class="sr-only">Include special symbols like exclamation mark, at sign, and hash in password</span>
               </label>
             </div>
             
             <div class="option-group">
               <label>
-                <input type="checkbox" id="exclude-ambiguous" checked>
+                <input type="checkbox" id="exclude-ambiguous" checked
+                       aria-describedby="ambiguous-help">
                 Exclude Ambiguous (il1Lo0O)
+                <span id="ambiguous-help" class="sr-only">Exclude characters that look similar like lowercase L, uppercase i, number 1, and number 0</span>
               </label>
             </div>
             
             <div class="option-group">
               <label>
-                <input type="checkbox" id="enforce-complexity" checked>
+                <input type="checkbox" id="enforce-complexity" checked
+                       aria-describedby="complexity-help">
                 Enforce Complexity Rules
+                <span id="complexity-help" class="sr-only">Ensure password meets complexity requirements with at least one character from each selected type</span>
               </label>
             </div>
-          </div>
+          </fieldset>
         </section>
         
         <!-- Passphrase Generation Section -->
-        <section class="generator-section">
-          <h2>Generate Passphrase</h2>
+        <section class="generator-section" aria-labelledby="passphrase-gen-heading">
+          <h2 id="passphrase-gen-heading">Generate Passphrase</h2>
           
           <div class="password-output">
             <div class="password-field">
@@ -125,21 +154,25 @@
           </div>
           
           <!-- Passphrase Options -->
-          <div class="options-grid">
+          <fieldset class="options-grid" aria-labelledby="passphrase-options-heading">
+            <legend id="passphrase-options-heading" class="sr-only">Passphrase Generation Options</legend>
             <div class="option-group">
-              <label for="word-count">Word Count: <span id="word-count-value">6</span></label>
-              <input type="range" id="word-count" min="3" max="12" value="6">
+              <label for="word-count">Word Count: <span id="word-count-value" aria-live="polite">6</span></label>
+              <input type="range" id="word-count" min="3" max="12" value="6"
+                     aria-describedby="word-count-help">
+              <div id="word-count-help" class="sr-only">Choose number of words in passphrase between 3 and 12</div>
             </div>
             
             <div class="option-group">
               <label for="word-separator">Separator:</label>
-              <select id="word-separator">
+              <select id="word-separator" aria-describedby="separator-help">
                 <option value="-">Hyphen (-)</option>
                 <option value="_">Underscore (_)</option>
                 <option value=" ">Space ( )</option>
                 <option value=".">Period (.)</option>
                 <option value="">None</option>
               </select>
+              <div id="separator-help" class="sr-only">Choose character to separate words in passphrase</div>
             </div>
             
             <div class="option-group">
@@ -166,24 +199,31 @@
         </section>
         
         <!-- Batch Generation Section -->
-        <section class="generator-section">
-          <h2>Batch Generation</h2>
+        <section class="generator-section" aria-labelledby="batch-gen-heading">
+          <h2 id="batch-gen-heading">Batch Generation</h2>
           
           <div class="batch-controls">
             <div class="option-group">
-              <label for="batch-count">Number of Passwords: <span id="batch-count-value">5</span></label>
-              <input type="range" id="batch-count" min="1" max="20" value="5">
+              <label for="batch-count">Number of Passwords: <span id="batch-count-value" aria-live="polite">5</span></label>
+              <input type="range" id="batch-count" min="1" max="20" value="5"
+                     aria-describedby="batch-count-help">
+              <div id="batch-count-help" class="sr-only">Choose number of passwords to generate at once, between 1 and 20</div>
             </div>
             
-            <button id="generate-batch" class="btn btn-primary">Generate Batch</button>
+            <button id="generate-batch" class="btn btn-primary" aria-describedby="batch-generate-help">
+              Generate Batch
+              <span id="batch-generate-help" class="sr-only">Generate multiple passwords at once with current settings</span>
+            </button>
           </div>
           
-          <div id="batch-results" class="batch-results"></div>
+          <div id="batch-results" class="batch-results" aria-live="polite" 
+               aria-label="Batch generation results"></div>
         </section>
         
         <!-- Password Details Section -->
-        <section class="generator-section" id="password-details" style="display: none;">
-          <h2>Password Analysis</h2>
+        <section class="generator-section" id="password-details" style="display: none;" 
+                 aria-labelledby="analysis-heading">
+          <h2 id="analysis-heading">Password Analysis</h2>
           
           <div class="details-grid">
             <div class="detail-item">
@@ -216,10 +256,11 @@
     </main>
     
     <!-- Notification area -->
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="notification" aria-live="assertive" aria-atomic="true" role="alert"></div>
   </div>
   
   <!-- JavaScript -->
+  <script src="../js/accessibility-manager.js"></script>
   <script src="../js/theme-manager.js"></script>
   <script src="../js/keyboard-shortcuts-manager.js"></script>
   <script src="../js/generator.js"></script>
