@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>SecurePass Desktop - Home</title>
@@ -10,22 +10,28 @@
   <!-- Viewport for responsive design -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- Accessibility metadata -->
+  <meta name="description" content="SecurePass Desktop - Secure password management solution">
+  
   <!-- CSS -->
   <link rel="stylesheet" href="../styles/themes.css">
   <link rel="stylesheet" href="../styles/main.css">
 </head>
 <body>
+  <!-- Skip to main content link for screen readers -->
+  <a href="#main-content" class="skip-link sr-only-focusable">Skip to main content</a>
+  
   <div id="app">
-    <header class="app-header">
+    <header class="app-header" role="banner">
       <h1>SecurePass Desktop</h1>
       <div class="app-info">
-        <span id="version-info">Loading...</span>
+        <span id="version-info" aria-live="polite">Loading...</span>
       </div>
     </header>
     
-    <main class="app-main full-width">
+    <main class="app-main full-width" id="main-content" role="main">
       <!-- Authentication Required Section (shown when not logged in) -->
-      <div id="auth-required" class="welcome-container" style="display: none;">
+      <section id="auth-required" class="welcome-container" style="display: none;" aria-label="Authentication required">
         <h2>Authentication Required</h2>
         <p>Please sign in to access SecurePass Desktop</p>
         
@@ -36,95 +42,135 @@
           </div>
         </div>
         
-        <div class="auth-actions">
-          <button id="show-login" class="btn btn-primary">🔑 Sign In</button>
-          <button id="show-setup" class="btn btn-secondary">🆕 Set Up Master Password</button>
+        <div class="auth-actions" role="group" aria-label="Authentication options">
+          <button id="show-login" class="btn btn-primary" aria-describedby="signin-help">
+            🔑 Sign In
+            <span id="signin-help" class="sr-only">Sign in with your existing master password</span>
+          </button>
+          <button id="show-setup" class="btn btn-secondary" aria-describedby="setup-help">
+            🆕 Set Up Master Password
+            <span id="setup-help" class="sr-only">Create a new master password for first-time setup</span>
+          </button>
         </div>
         
         <!-- Inline Login Form -->
-        <div id="login-form" class="auth-form" style="display: none;">
-          <h3>Sign In</h3>
-          <form id="auth-form">
+        <section id="login-form" class="auth-form" style="display: none;" aria-labelledby="signin-heading">
+          <h3 id="signin-heading">Sign In</h3>
+          <form id="auth-form" role="form" aria-label="Sign in to SecurePass">
             <div class="form-group">
               <label for="username">Username:</label>
-              <input type="text" id="username" name="username" required autocomplete="username">
+              <input type="text" id="username" name="username" required autocomplete="username" 
+                     aria-required="true" aria-describedby="username-help">
+              <div id="username-help" class="sr-only">Enter your username for SecurePass</div>
             </div>
             
             <div class="form-group">
               <label for="password">Master Password:</label>
-              <input type="password" id="password" name="password" required autocomplete="current-password">
+              <input type="password" id="password" name="password" required autocomplete="current-password" 
+                     aria-required="true" aria-describedby="password-help">
+              <div id="password-help" class="sr-only">Enter your secure master password</div>
             </div>
             
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Sign In</button>
-              <button type="button" id="cancel-login" class="btn btn-secondary">Cancel</button>
+            <div class="form-actions" role="group" aria-label="Form actions">
+              <button type="submit" class="btn btn-primary" aria-describedby="signin-submit-help">
+                Sign In
+                <span id="signin-submit-help" class="sr-only">Submit sign in form</span>
+              </button>
+              <button type="button" id="cancel-login" class="btn btn-secondary" aria-label="Cancel sign in">
+                Cancel
+              </button>
             </div>
           </form>
           
-          <div id="auth-result" class="result-message"></div>
-        </div>
+          <div id="auth-result" class="result-message" aria-live="polite" aria-atomic="true"></div>
+        </section>
         
         <div class="result-section">
-          <div id="auth-message" class="result-message"></div>
+          <div id="auth-message" class="result-message" aria-live="polite" aria-atomic="true"></div>
         </div>
-      </div>
+      </section>
       
       <!-- Main Dashboard (shown when authenticated) -->
-      <div id="main-dashboard" class="welcome-container" style="display: none;">
-        <h2>Welcome to SecurePass Desktop</h2>
+      <section id="main-dashboard" class="welcome-container" style="display: none;" aria-labelledby="dashboard-heading">
+        <h2 id="dashboard-heading">Welcome to SecurePass Desktop</h2>
         <p>Your secure password management solution</p>
         
-        <div class="status-section">
+        <section class="status-section" aria-label="Application status">
           <div class="status-item">
             <span class="status-label">Status:</span>
-            <span id="app-status" class="status-value">Ready</span>
+            <span id="app-status" class="status-value" aria-live="polite">Ready</span>
           </div>
           <div class="status-item">
             <span class="status-label">Database:</span>
-            <span id="db-status" class="status-value">Connected</span>
+            <span id="db-status" class="status-value" aria-live="polite">Connected</span>
           </div>
           <div class="status-item">
             <span class="status-label">Security:</span>
-            <span id="security-status" class="status-value">Active</span>
+            <span id="security-status" class="status-value" aria-live="polite">Active</span>
           </div>
           <div class="status-item">
             <span class="status-label">User:</span>
-            <span id="current-user" class="status-value">-</span>
+            <span id="current-user" class="status-value" aria-live="polite">-</span>
           </div>
-        </div>
+        </section>
         
-        <div class="actions-section">
-          <button id="password-generator" class="btn btn-primary">🔐 Password Generator</button>
-          <button id="password-vault" class="btn btn-secondary">🗃️ Password Vault</button>
-          <button id="app-settings" class="btn btn-secondary">⚙️ Settings</button>
-        </div>
+        <section class="actions-section" role="navigation" aria-label="Main actions">
+          <button id="password-generator" class="btn btn-primary" aria-describedby="generator-help">
+            🔐 Password Generator
+            <span id="generator-help" class="sr-only">Generate secure passwords with customizable options</span>
+          </button>
+          <button id="password-vault" class="btn btn-secondary" aria-describedby="vault-help">
+            🗃️ Password Vault
+            <span id="vault-help" class="sr-only">View and manage your stored passwords</span>
+          </button>
+          <button id="app-settings" class="btn btn-secondary" aria-describedby="settings-help">
+            ⚙️ Settings
+            <span id="settings-help" class="sr-only">Configure application preferences and security options</span>
+          </button>
+        </section>
         
-        <div class="quick-actions">
-          <h3>Quick Actions</h3>
-          <div class="quick-grid">
-            <button id="generate-quick" class="btn btn-outline">Generate Password</button>
-            <button id="check-strength" class="btn btn-outline">Check Strength</button>
-            <button id="import-passwords" class="btn btn-outline">Import Data</button>
-            <button id="backup-data" class="btn btn-outline">Backup Data</button>
+        <section class="quick-actions" aria-labelledby="quick-actions-heading">
+          <h3 id="quick-actions-heading">Quick Actions</h3>
+          <div class="quick-grid" role="group" aria-labelledby="quick-actions-heading">
+            <button id="generate-quick" class="btn btn-outline" aria-describedby="quick-gen-help">
+              Generate Password
+              <span id="quick-gen-help" class="sr-only">Quickly generate a password with default settings</span>
+            </button>
+            <button id="check-strength" class="btn btn-outline" aria-describedby="strength-help">
+              Check Strength
+              <span id="strength-help" class="sr-only">Analyze the strength of an existing password</span>
+            </button>
+            <button id="import-passwords" class="btn btn-outline" aria-describedby="import-help">
+              Import Data
+              <span id="import-help" class="sr-only">Import passwords from other password managers</span>
+            </button>
+            <button id="backup-data" class="btn btn-outline" aria-describedby="backup-help">
+              Backup Data
+              <span id="backup-help" class="sr-only">Create a secure backup of your password database</span>
+            </button>
           </div>
-        </div>
+        </section>
         
-        <div class="user-actions">
-          <button id="logout" class="btn btn-outline">🚪 Sign Out</button>
-        </div>
+        <section class="user-actions" role="group" aria-label="User account actions">
+          <button id="logout" class="btn btn-outline" aria-describedby="logout-help">
+            🚪 Sign Out
+            <span id="logout-help" class="sr-only">Sign out and lock the application</span>
+          </button>
+        </section>
         
         <div class="result-section">
-          <div id="result-message" class="result-message"></div>
+          <div id="result-message" class="result-message" aria-live="polite" aria-atomic="true"></div>
         </div>
-      </div>
+      </section>
     </main>
     
-    <footer class="app-footer">
+    <footer class="app-footer" role="contentinfo">
       <p>&copy; 2025 SecurePass Desktop. All rights reserved.</p>
     </footer>
   </div>
   
   <!-- JavaScript -->
+  <script src="../js/accessibility-manager.js"></script>
   <script src="../js/theme-manager.js"></script>
   <script src="../js/keyboard-shortcuts-manager.js"></script>
   <script src="../js/home.js"></script>
