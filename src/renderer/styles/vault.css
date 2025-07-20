@@ -547,3 +547,142 @@
 .vault-entry.new {
   animation: slideInUp 0.3s ease-out;
 }
+
+/* Additional Vault Entry Styles for New JS Elements */
+.entry-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.entry-username::before {
+  content: '👤 ';
+  margin-right: 4px;
+}
+
+.entry-url::before {
+  content: '🌐 ';
+  margin-right: 4px;
+}
+
+.entry-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.strength-label {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.strength-indicator {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.strength-indicator.very-weak {
+  background-color: #fee;
+  color: #c53030;
+  border: 1px solid #fc8181;
+}
+
+.strength-indicator.weak {
+  background-color: #fef5e7;
+  color: #d69e2e;
+  border: 1px solid #f6ad55;
+}
+
+.strength-indicator.moderate {
+  background-color: #fefcbf;
+  color: #d69e2e;
+  border: 1px solid #f6e05e;
+}
+
+.strength-indicator.strong {
+  background-color: #f0fff4;
+  color: #38a169;
+  border: 1px solid #68d391;
+}
+
+.strength-indicator.very-strong {
+  background-color: #f0fff4;
+  color: #2f855a;
+  border: 1px solid #48bb78;
+}
+
+.category-badge {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tag-badge {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  border: 1px solid var(--border-secondary);
+}
+
+.entry-dates {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
+}
+
+.entry-dates small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* No Results State */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+}
+
+.no-results-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.no-results h3 {
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+  font-size: var(--font-lg);
+}
+
+.no-results p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+}
+
+/* Modal Display Fix */
+.modal[style*="block"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal[style*="block"] .modal-content {
+  transform: scale(1);
+}
