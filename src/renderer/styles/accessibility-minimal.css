@@ -1,0 +1,148 @@
+/**
+ * Minimal Accessibility CSS - Non-intrusive WCAG 2.1 AA Compliance
+ * Only adds essential accessibility without breaking existing UI
+ */
+
+/* ===== SCREEN READER SUPPORT ===== */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Screen reader only content that becomes visible on focus */
+.sr-only-focusable:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0.25rem 0.5rem !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  background: #007cba;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 10000;
+}
+
+/* ===== SKIP LINKS ===== */
+
+.skip-links {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: 10000;
+}
+
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  background: #007cba;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.skip-link:focus {
+  position: static;
+  left: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  outline: 2px solid white;
+  outline-offset: 2px;
+  z-index: 10001;
+}
+
+/* ===== ENHANCED FOCUS (OPTIONAL) ===== */
+
+/* Only enhance focus in high contrast mode or when specifically needed */
+@media (prefers-contrast: high) {
+  *:focus {
+    outline: 3px solid HighlightText !important;
+    outline-offset: 2px !important;
+  }
+  
+  button:focus,
+  .btn:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  a:focus {
+    background-color: Highlight !important;
+    color: HighlightText !important;
+  }
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== MODAL ACCESSIBILITY ===== */
+
+.modal[aria-hidden="true"] {
+  display: none !important;
+}
+
+.modal[aria-hidden="false"] {
+  display: block !important;
+}
+
+/* ===== PRINT ACCESSIBILITY ===== */
+
+@media print {
+  .skip-links {
+    display: none !important;
+  }
+}
+
+/* ===== RESPONSIVE TOUCH TARGETS ===== */
+
+@media (max-width: 768px) {
+  /* Ensure minimum touch target size on mobile */
+  button,
+  .btn,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ===== DARK THEME COMPATIBILITY ===== */
+
+[data-theme="dark"] .skip-link {
+  background: #4fc3f7;
+  color: #000;
+}
+
+[data-theme="dark"] .sr-only-focusable:focus {
+  background: #4fc3f7;
+  color: #000;
+}
