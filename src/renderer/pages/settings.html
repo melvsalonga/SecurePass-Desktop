@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Settings - SecurePass Desktop</title>
@@ -10,6 +10,9 @@
   <!-- Viewport for responsive design -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
+  <!-- Accessibility metadata -->
+  <meta name="description" content="SecurePass Desktop Settings - Configure security, appearance, and password generation preferences">
+  
   <!-- CSS -->
   <link rel="stylesheet" href="../styles/themes.css">
   <link rel="stylesheet" href="../styles/main.css">
@@ -17,29 +20,31 @@
 </head>
 <body>
   <div id="app">
-    <header class="app-header">
+    <header class="app-header" role="banner">
       <h1>⚙️ Settings</h1>
       <div class="app-info">
-        <nav class="app-nav">
-          <button id="back-home" class="btn btn-secondary">← Back to Home</button>
+        <nav class="app-nav" role="navigation" aria-label="Page navigation">
+          <button id="back-home" class="btn btn-secondary" aria-label="Go back to home page">← Back to Home</button>
         </nav>
       </div>
     </header>
     
-    <main class="app-main full-width">
+    <main class="app-main full-width" id="main-content" role="main">
       <div class="settings-container">
         <!-- General Settings -->
-        <section class="settings-section">
-          <h2>General Settings</h2>
+        <section class="settings-section" aria-labelledby="general-heading">
+          <h2 id="general-heading">General Settings</h2>
           
-          <div class="setting-group">
+          <fieldset class="setting-group" aria-labelledby="theme-group-heading">
+            <legend><h3 id="theme-group-heading" class="sr-only">Theme Selection</h3></legend>
             <label for="theme-select">Theme:</label>
-            <select id="theme-select">
+            <select id="theme-select" aria-describedby="theme-help">
               <option value="system">System Default</option>
               <option value="light">Light</option>
               <option value="dark">Dark</option>
             </select>
-          </div>
+            <div id="theme-help" class="sr-only">Choose application theme: system default follows OS preference</div>
+          </fieldset>
           
           <div class="setting-group">
             <label for="language-select">Language:</label>
@@ -67,16 +72,20 @@
         </section>
         
         <!-- Security Settings -->
-        <section class="settings-section">
-          <h2>Security Settings</h2>
+        <section class="settings-section" aria-labelledby="security-heading">
+          <h2 id="security-heading">Security Settings</h2>
           
-          <div class="setting-group">
+          <fieldset class="setting-group" aria-labelledby="auto-lock-group">
+            <legend><h3 id="auto-lock-group" class="sr-only">Auto-Lock Settings</h3></legend>
             <label for="auto-lock-timeout">Auto-lock timeout (minutes):</label>
             <div class="input-with-slider">
-              <input type="range" id="auto-lock-timeout" min="1" max="60" value="15">
-              <span id="auto-lock-value">15</span>
+              <input type="range" id="auto-lock-timeout" min="1" max="60" value="15" 
+                     aria-describedby="auto-lock-help" aria-labelledby="auto-lock-timeout-label">
+              <span id="auto-lock-value" aria-live="polite">15</span>
+              <div id="auto-lock-timeout-label" class="sr-only">Auto-lock timeout slider</div>
             </div>
-          </div>
+            <div id="auto-lock-help" class="sr-only">Time in minutes before application locks automatically due to inactivity</div>
+          </fieldset>
           
           <div class="setting-group">
             <label for="clipboard-timeout">Clipboard clear timeout (seconds):</label>
@@ -215,27 +224,34 @@
         </section>
         
         <!-- Password Import/Export -->
-        <section class="settings-section">
-          <h2>Password Import/Export</h2>
+        <section class="settings-section" aria-labelledby="import-export-heading">
+          <h2 id="import-export-heading">Password Import/Export</h2>
           
           <div class="setting-group">
             <h3>Export Passwords</h3>
             <p>Export your password vault to backup or transfer to another application.</p>
             
-            <div class="export-options">
+            <fieldset class="export-options" aria-labelledby="export-format-legend">
+              <legend id="export-format-legend">Export Format:</legend>
               <label>
-                <input type="radio" name="export-format" value="json" checked>
+                <input type="radio" name="export-format" value="json" checked 
+                       aria-describedby="json-help">
                 JSON (SecurePass format)
+                <span id="json-help" class="sr-only">SecurePass native JSON format with full metadata</span>
               </label>
               <label>
-                <input type="radio" name="export-format" value="csv">
+                <input type="radio" name="export-format" value="csv" 
+                       aria-describedby="csv-help">
                 CSV (Universal format)
+                <span id="csv-help" class="sr-only">Comma-separated values format compatible with most password managers</span>
               </label>
               <label>
-                <input type="radio" name="export-format" value="xml">
+                <input type="radio" name="export-format" value="xml" 
+                       aria-describedby="xml-help">
                 XML (Structured format)
+                <span id="xml-help" class="sr-only">Structured XML format with hierarchical data organization</span>
               </label>
-            </div>
+            </fieldset>
             
             <div class="export-security">
               <label>
@@ -277,20 +293,32 @@
         </section>
         
         <!-- Action Buttons -->
-        <section class="settings-actions">
-          <button id="save-settings" class="btn btn-primary">Save Settings</button>
-          <button id="cancel-settings" class="btn btn-secondary">Cancel</button>
-          <button id="export-settings" class="btn btn-secondary">Export Settings</button>
-          <button id="import-settings" class="btn btn-secondary">Import Settings</button>
+        <section class="settings-actions" role="group" aria-label="Settings actions">
+          <button id="save-settings" class="btn btn-primary" aria-describedby="save-help">
+            Save Settings
+            <span id="save-help" class="sr-only">Save all changed settings</span>
+          </button>
+          <button id="cancel-settings" class="btn btn-secondary" aria-label="Cancel changes and return to previous settings">
+            Cancel
+          </button>
+          <button id="export-settings" class="btn btn-secondary" aria-describedby="export-settings-help">
+            Export Settings
+            <span id="export-settings-help" class="sr-only">Export current settings to a file</span>
+          </button>
+          <button id="import-settings" class="btn btn-secondary" aria-describedby="import-settings-help">
+            Import Settings
+            <span id="import-settings-help" class="sr-only">Import settings from a file</span>
+          </button>
         </section>
       </div>
     </main>
     
     <!-- Notification area -->
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="notification" aria-live="assertive" aria-atomic="true" role="alert"></div>
   </div>
   
   <!-- JavaScript -->
+  <script src="../js/accessibility-manager.js"></script>
   <script src="../js/theme-manager.js"></script>
   <script src="../js/keyboard-shortcuts-manager.js"></script>
   <script src="../js/settings.js"></script>
