@@ -49,6 +49,10 @@
                 Generate
                 <span id="generate-help" class="sr-only">Generate a new password with current settings</span>
               </button>
+              <button id="save-password-btn" class="btn btn-success" aria-describedby="save-help" disabled>
+                💾 Save
+                <span id="save-help" class="sr-only">Save the generated password to your vault</span>
+              </button>
             </div>
             
             <div class="strength-meter" aria-labelledby="strength-heading">
@@ -264,6 +268,104 @@
         </section>
       </div>
     </main>
+    
+    <!-- Quick Actions Section -->
+    <div class="quick-actions" role="complementary" aria-labelledby="quick-actions-heading">
+      <h3 id="quick-actions-heading" class="sr-only">Quick Actions</h3>
+      <div class="action-buttons">
+        <button id="view-vault-btn" class="btn btn-secondary" aria-describedby="vault-help">
+          📁 View Vault
+          <span id="vault-help" class="sr-only">Open the password vault to manage saved passwords</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Add Password Modal -->
+    <div id="add-password-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true" tabindex="-1">
+      <div class="modal-content" role="document">
+        <div class="modal-header">
+          <h2 id="modal-title">💾 Save Password</h2>
+          <button id="close-modal" class="btn btn-icon" aria-label="Close modal" title="Close">
+            ❌
+          </button>
+        </div>
+        
+        <form id="add-password-form" class="modal-body">
+          <div class="form-group">
+            <label for="modal-title-input">Title *</label>
+            <input type="text" id="modal-title-input" required 
+                   placeholder="e.g., Gmail Account" 
+                   aria-describedby="title-help"
+                   autocomplete="off">
+            <div id="title-help" class="sr-only">Enter a descriptive title for this password entry</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="modal-username">Username/Email</label>
+            <input type="text" id="modal-username" 
+                   placeholder="e.g., john.doe@example.com" 
+                   aria-describedby="username-help"
+                   autocomplete="username">
+            <div id="username-help" class="sr-only">Enter the username or email associated with this password</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="modal-password">Password *</label>
+            <div class="password-input-group">
+              <input type="password" id="modal-password" required 
+                     aria-describedby="password-help"
+                     autocomplete="new-password">
+              <button type="button" id="modal-toggle-password" class="btn btn-icon" 
+                      aria-label="Toggle password visibility" title="Show/Hide Password">
+                👁️
+              </button>
+            </div>
+            <div id="password-help" class="sr-only">The password will be automatically filled with your generated password</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="modal-url">Website URL</label>
+            <input type="url" id="modal-url" 
+                   placeholder="https://example.com" 
+                   aria-describedby="url-help"
+                   autocomplete="url">
+            <div id="url-help" class="sr-only">Enter the website URL where this password is used</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="modal-category">Category</label>
+            <select id="modal-category" aria-describedby="category-help">
+              <option value="">Select a category...</option>
+              <option value="personal">Personal</option>
+              <option value="work">Work</option>
+              <option value="finance">Finance</option>
+              <option value="social">Social Media</option>
+              <option value="shopping">Shopping</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="other">Other</option>
+            </select>
+            <div id="category-help" class="sr-only">Choose a category to organize this password entry</div>
+          </div>
+          
+          <div class="form-group">
+            <label for="modal-notes">Notes</label>
+            <textarea id="modal-notes" rows="3" 
+                      placeholder="Optional notes about this password..." 
+                      aria-describedby="notes-help"></textarea>
+            <div id="notes-help" class="sr-only">Add any additional notes or information about this password entry</div>
+          </div>
+        </form>
+        
+        <div class="modal-footer">
+          <button type="button" id="cancel-save" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" form="add-password-form" id="confirm-save" class="btn btn-success">
+            💾 Save Password
+          </button>
+        </div>
+      </div>
+    </div>
     
     <!-- Notification area -->
     <div id="notification" class="notification" aria-live="assertive" aria-atomic="true" role="alert"></div>

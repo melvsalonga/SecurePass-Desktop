@@ -40,6 +40,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Password Storage APIs
   addPassword: (entry) => ipcRenderer.invoke('add-password', entry),
+  savePassword: (entry) => ipcRenderer.invoke('add-password', entry), // Alias for addPassword
   updatePassword: (id, entry) => ipcRenderer.invoke('update-password', id, entry),
   deletePassword: (id) => ipcRenderer.invoke('delete-password', id),
   getPasswords: () => ipcRenderer.invoke('get-passwords'),

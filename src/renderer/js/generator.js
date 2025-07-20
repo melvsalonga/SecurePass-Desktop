@@ -48,6 +48,11 @@ class PasswordGeneratorUI {
       this.copyToClipboard('passphrase');
     });
 
+    // Save password button
+    document.getElementById('save-password-btn').addEventListener('click', () => {
+      this.openSavePasswordModal();
+    });
+
     // Passphrase generation
     document.getElementById('generate-passphrase').addEventListener('click', () => {
       this.generatePassphrase();
@@ -57,6 +62,14 @@ class PasswordGeneratorUI {
     document.getElementById('generate-batch').addEventListener('click', () => {
       this.generateBatchPasswords();
     });
+
+    // View vault button
+    document.getElementById('view-vault-btn').addEventListener('click', () => {
+      window.location.href = 'vault.html';
+    });
+
+    // Modal event listeners
+    this.initializeModalEventListeners();
 
     // Length slider updates
     document.getElementById('password-length').addEventListener('input', (e) => {
@@ -116,6 +129,9 @@ class PasswordGeneratorUI {
         this.updatePasswordDetails(response.data);
         this.addToHistory(response.data.password, 'password');
         this.showNotification('Password generated successfully!', 'success');
+        
+        // Enable save button
+        this.enableSaveButton();
         
         // Analyze password strength
         await this.analyzePasswordStrength(response.data.password);
@@ -697,6 +713,237 @@ class PasswordGeneratorUI {
         window.location.href = 'home.html';
       });
     }
+  }
+
+  /**
+   * Initialize modal event listeners
+   */
+  initializeModalEventListeners() {
+    const modal = document.getElementById('add-password-modal');
+    const closeBtn = document.getElementById('close-modal');
+    const cancelBtn = document.getElementById('cancel-save');
+    const confirmBtn = document.getElementById('confirm-save');
+    const togglePasswordBtn = document.getElementById('modal-toggle-password');
+    const form = document.getElementById('add-password-form');
+
+    // Close modal handlers
+    [closeBtn, cancelBtn].forEach(btn => {
+      if (btn) {
+        btn.addEventListener('click', () => {
+          this.closeSavePasswordModal();
+        });
+      }
+    });
+
+    // Close modal on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        this.closeSavePasswordModal();
+      }
+    });
+
+    // Toggle password visibility
+    if (togglePasswordBtn) {
+      togglePasswordBtn.addEventListener('click', () => {
+        this.toggleModalPasswordVisibility();
+      });
+    }
+
+    // Form submission
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.savePasswordToVault();
+      });
+    }
+
+    // Escape key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        this.closeSavePasswordModal();
+      }
+    });
+  }
+
+  /**
+   * Enable save password button
+   */
+  enableSaveButton() {
+    const saveBtn = document.getElementById('save-password-btn');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = '1';
+      saveBtn.style.cursor = 'pointer';
+    }
+  }
+
+  /**
+   * Disable save password button
+   */
+  disableSaveButton() {
+    const saveBtn = document.getElementById('save-password-btn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = '0.5';
+      saveBtn.style.cursor = 'not-allowed';
+    }
+  }
+
+  /**
+   * Open save password modal
+   */
+  openSavePasswordModal() {
+    if (!this.currentPassword) {
+      this.showNotification('No password to save. Generate a password first.', 'warning');
+      return;
+    }
+
+    const modal = document.getElementById('add-password-modal');
+    const passwordInput = document.getElementById('modal-password');
+    const titleInput = document.getElementById('modal-title-input');
+
+    // Pre-fill the password
+    if (passwordInput) {
+      passwordInput.value = this.currentPassword;
+    }
+
+    // Focus on title input
+    if (titleInput) {
+      titleInput.value = '';
+      titleInput.focus();
+    }
+
+    // Show modal
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+
+    // Trap focus in modal
+    this.trapFocusInModal(modal);
+  }
+
+  /**
+   * Close save password modal
+   */
+  closeSavePasswordModal() {
+    const modal = document.getElementById('add-password-modal');
+    const form = document.getElementById('add-password-form');
+
+    // Hide modal
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+
+    // Reset form
+    if (form) {
+      form.reset();
+    }
+
+    // Return focus to save button
+    const saveBtn = document.getElementById('save-password-btn');
+    if (saveBtn) {
+      saveBtn.focus();
+    }
+  }
+
+  /**
+   * Toggle modal password visibility
+   */
+  toggleModalPasswordVisibility() {
+    const passwordInput = document.getElementById('modal-password');
+    const toggleBtn = document.getElementById('modal-toggle-password');
+
+    if (passwordInput && toggleBtn) {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.textContent = '🙈';
+        toggleBtn.setAttribute('aria-label', 'Hide password');
+      } else {
+        passwordInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+        toggleBtn.setAttribute('aria-label', 'Show password');
+      }
+    }
+  }
+
+  /**
+   * Save password to vault
+   */
+  async savePasswordToVault() {
+    try {
+      const formData = {
+        title: document.getElementById('modal-title-input').value.trim(),
+        username: document.getElementById('modal-username').value.trim(),
+        password: document.getElementById('modal-password').value,
+        url: document.getElementById('modal-url').value.trim(),
+        category: document.getElementById('modal-category').value,
+        notes: document.getElementById('modal-notes').value.trim()
+      };
+
+      // Basic validation
+      if (!formData.title) {
+        this.showNotification('Please enter a title for the password entry.', 'error');
+        document.getElementById('modal-title-input').focus();
+        return;
+      }
+
+      if (!formData.password) {
+        this.showNotification('No password to save.', 'error');
+        return;
+      }
+
+      // Show saving state
+      const confirmBtn = document.getElementById('confirm-save');
+      const originalText = confirmBtn.textContent;
+      confirmBtn.textContent = 'Saving...';
+      confirmBtn.disabled = true;
+
+      // Call the save API
+      const response = await window.electronAPI.addPassword(formData);
+
+      if (response.success) {
+        this.showNotification('Password saved to vault successfully!', 'success');
+        this.closeSavePasswordModal();
+        
+        // Reset current password and disable save button since password is now saved
+        this.currentPassword = '';
+        this.disableSaveButton();
+      } else {
+        this.showNotification(response.error || 'Failed to save password', 'error');
+      }
+    } catch (error) {
+      this.showNotification('Error saving password: ' + error.message, 'error');
+    } finally {
+      // Reset button state
+      const confirmBtn = document.getElementById('confirm-save');
+      confirmBtn.textContent = '💾 Save Password';
+      confirmBtn.disabled = false;
+    }
+  }
+
+  /**
+   * Trap focus within modal for accessibility
+   */
+  trapFocusInModal(modal) {
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    });
   }
 }
 
