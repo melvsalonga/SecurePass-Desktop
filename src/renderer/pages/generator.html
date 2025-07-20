@@ -70,9 +70,12 @@
           <fieldset class="options-grid" aria-labelledby="password-options-heading">
             <legend id="password-options-heading" class="sr-only">Password Generation Options</legend>
             <div class="option-group">
-              <label for="password-length">Length: <span id="length-value" aria-live="polite">16</span></label>
-              <input type="range" id="password-length" min="4" max="128" value="16"
-                     aria-describedby="length-help">
+              <label for="password-length">Password Length:</label>
+              <div class="input-with-slider">
+                <input type="range" id="password-length" min="4" max="128" value="16"
+                       aria-describedby="length-help">
+                <span id="length-value" aria-live="polite">16</span>
+              </div>
               <div id="length-help" class="sr-only">Choose password length between 4 and 128 characters</div>
             </div>
             
@@ -158,9 +161,12 @@
           <fieldset class="options-grid" aria-labelledby="passphrase-options-heading">
             <legend id="passphrase-options-heading" class="sr-only">Passphrase Generation Options</legend>
             <div class="option-group">
-              <label for="word-count">Word Count: <span id="word-count-value" aria-live="polite">6</span></label>
-              <input type="range" id="word-count" min="3" max="12" value="6"
-                     aria-describedby="word-count-help">
+              <label for="word-count">Word Count:</label>
+              <div class="input-with-slider">
+                <input type="range" id="word-count" min="3" max="12" value="6"
+                       aria-describedby="word-count-help">
+                <span id="word-count-value" aria-live="polite">6</span>
+              </div>
               <div id="word-count-help" class="sr-only">Choose number of words in passphrase between 3 and 12</div>
             </div>
             
@@ -196,7 +202,7 @@
                 Include Symbol
               </label>
             </div>
-          </div>
+          </fieldset>
         </section>
         
         <!-- Batch Generation Section -->
@@ -205,9 +211,12 @@
           
           <div class="batch-controls">
             <div class="option-group">
-              <label for="batch-count">Number of Passwords: <span id="batch-count-value" aria-live="polite">5</span></label>
-              <input type="range" id="batch-count" min="1" max="20" value="5"
-                     aria-describedby="batch-count-help">
+              <label for="batch-count">Number of Passwords:</label>
+              <div class="input-with-slider">
+                <input type="range" id="batch-count" min="1" max="20" value="5"
+                       aria-describedby="batch-count-help">
+                <span id="batch-count-value" aria-live="polite">5</span>
+              </div>
               <div id="batch-count-help" class="sr-only">Choose number of passwords to generate at once, between 1 and 20</div>
             </div>
             
