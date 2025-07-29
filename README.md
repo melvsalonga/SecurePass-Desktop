@@ -1,6 +1,8 @@
-# SecurePass Desktop
+# 🔐 SecurePass Desktop
 
-A secure, cross-platform password manager desktop application built with Electron and modern web technologies.
+**A secure, cross-platform password manager with zero-knowledge architecture and enterprise-grade encryption**
+
+SecurePass Desktop is a sophisticated password management solution built with Electron, featuring AES-256 encryption, advanced password generation, and comprehensive security measures. Perfect for individuals and professionals who need secure, offline password management with modern UI/UX.
 
 ## 🔒 Security Features
 
@@ -32,6 +34,31 @@ A secure, cross-platform password manager desktop application built with Electro
 - **Cross-platform Support** - Windows, macOS, and Linux compatibility
 - **Modern UI/UX** - Responsive design with smooth animations and accessibility support
 - **Secure Architecture** - Sandboxed processes, context isolation, and zero-knowledge design
+
+## 🛠️ Tech Stack
+
+### **Desktop Framework**
+- **[Electron 37.2.3](https://electronjs.org/)** - Cross-platform desktop app framework
+- **[Node.js](https://nodejs.org/)** - JavaScript runtime environment
+- **HTML5/CSS3/JavaScript** - Modern web technologies
+
+### **Security & Encryption**
+- **AES-256** - Advanced Encryption Standard
+- **Argon2** - Password hashing algorithm
+- **better-sqlite3** - SQLite database with encryption
+- **Secure Random** - Cryptographically secure random generation
+
+### **Development & Testing**
+- **[Jest 30.0.4](https://jestjs.io/)** - JavaScript testing framework
+- **[ESLint 9.31.0](https://eslint.org/)** - Code linting and quality
+- **[Prettier 3.6.2](https://prettier.io/)** - Code formatting
+- **[Babel](https://babeljs.io/)** - JavaScript compiler
+- **[Webpack](https://webpack.js.org/)** - Module bundler
+
+### **Build & Distribution**
+- **[Electron Builder 26.0.12](https://www.electron.build/)** - Package and build automation
+- **Cross-platform builds** - Windows, macOS, Linux support
+- **Code signing** - Application signing and verification
 
 ## 📋 Requirements
 
@@ -221,3 +248,9 @@ See the [tasks document](tasks.md) for detailed progress and upcoming features.
 
 **Version:** 1.0.0  
 **Status:** Development
+
+**Made with ❤️ using Electron, modern web technologies, and enterprise-grade security**
+
+---
+
+**Made by [focicat](https://github.com/melvsalonga) 🫰**
